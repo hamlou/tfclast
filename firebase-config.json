@@ -1,0 +1,10 @@
+{
+  "auth": {
+    "emailVerificationTemplate": {
+      "actionUrl": "http://localhost:5176/verify-email"
+    },
+    "passwordResetTemplate": {
+      "actionUrl": "http://localhost:5176/login"
+    }
+  }
+}

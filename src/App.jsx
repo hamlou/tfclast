@@ -1,0 +1,148 @@
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
+import { UserProvider, useUser } from './context/UserContext';
+import { HelmetProvider } from 'react-helmet-async';
+import DashboardLayout from './layouts/DashboardLayout';
+import Home from './pages/Home';
+import Profile from './pages/Profile';
+import History from './pages/History';
+import MyList from './pages/MyList';
+import Admin from './pages/Admin';
+import Login from './pages/Login';
+import Browse from './pages/Browse';
+import Subscription from './pages/Subscription';
+import Search from './pages/Search';
+import Champions from './pages/Champions';
+import Settings from './pages/Settings';
+import NotFound from './pages/NotFound';
+import PaymentSuccess from './pages/PaymentSuccess';
+
+import AdminLayout from './layouts/AdminLayout';
+
+// ── Scroll to top on every route change ──────────────────────────────────────
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
+  return null;
+}
+import AdminDashboard from './pages/admin/AdminDashboard';
+import VideosManager from './pages/admin/VideosManager';
+import CategoriesManager from './pages/admin/CategoriesManager';
+import UsersManager from './pages/admin/UsersManager';
+import SubscriptionsManager from './pages/admin/SubscriptionsManager';
+
+import Analytics from './pages/admin/Analytics';
+import ChampionsManager from './pages/admin/ChampionsManager';
+import EventsManager from './pages/admin/EventsManager';
+
+import LogoutModal from './components/LogoutModal';
+import MmaLanding from './pages/MmaLanding';
+import VerifyEmail from './pages/VerifyEmail';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetSent from './pages/ResetSent';
+import ResetPassword from './pages/ResetPassword';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import Terms from './pages/Terms';
+import DeleteAccount from './pages/DeleteAccount';
+
+const AppRoutes = () => {
+  try {
+    const { user, isLogoutModalOpen, setIsLogoutModalOpen, logout } = useUser();
+    const navigate = useNavigate();
+
+    const handleLogoutConfirm = () => {
+      setIsLogoutModalOpen(false);
+      setTimeout(() => {
+        logout();
+        navigate('/login');
+      }, 100);
+    };
+
+    return (
+      <>
+        <ScrollToTop />
+        {user ? (
+          <Routes>
+            <Route path="/" element={<DashboardLayout />}>
+              <Route index element={<Home />} />
+              <Route path="browse" element={<Browse />} />
+              <Route path="profile" element={<Profile />} />
+              <Route path="history" element={<History />} />
+              <Route path="mylist" element={<MyList />} />
+              <Route path="subscription" element={<Subscription />} />
+              <Route path="search" element={<Search />} />
+              <Route path="champions" element={<Champions />} />
+              <Route path="settings" element={<Settings />} />
+              <Route path="payment/success" element={<PaymentSuccess />} />
+              <Route path="privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="terms" element={<Terms />} />
+              <Route path="delete-account" element={<DeleteAccount />} />
+              <Route path="*" element={<NotFound />} />
+            </Route>
+
+            <Route path="/login" element={<Navigate to="/" replace />} />
+            <Route path="/verify-email" element={<Navigate to="/" replace />} />
+            <Route path="/forgot-password" element={<Navigate to="/" replace />} />
+            <Route path="/reset-sent" element={<Navigate to="/" replace />} />
+            <Route path="/reset-password" element={<Navigate to="/" replace />} />
+
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<AdminDashboard />} />
+              <Route path="videos" element={<VideosManager />} />
+              <Route path="categories" element={<CategoriesManager />} />
+              <Route path="users" element={<UsersManager />} />
+              <Route path="subscriptions" element={<SubscriptionsManager />} />
+              <Route path="champions" element={<ChampionsManager />} />
+              <Route path="events" element={<EventsManager />} />
+
+              <Route path="analytics" element={<Analytics />} />
+            </Route>
+          </Routes>
+        ) : (
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-sent" element={<ResetSent />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/mma" element={<MmaLanding />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/delete-account" element={<DeleteAccount />} />
+            <Route path="*" element={<Navigate to="/login" />} />
+          </Routes>
+        )}
+
+        <LogoutModal
+          isOpen={isLogoutModalOpen}
+          onClose={() => setIsLogoutModalOpen(false)}
+          onConfirm={handleLogoutConfirm}
+        />
+      </>
+    );
+  } catch (error) {
+    console.error('❌ CRITICAL ERROR in AppRoutes:', error);
+    return (
+      <div style={{ padding: '40px', color: 'red', fontFamily: 'Arial' }}>
+        <h1>App Error</h1>
+        <pre>{error.message}</pre>
+        <button onClick={() => window.location.reload()}>Reload Page</button>
+      </div>
+    );
+  }
+};
+
+function App() {
+  return (
+    <HelmetProvider>
+      <UserProvider>
+        <BrowserRouter>
+          <AppRoutes />
+        </BrowserRouter>
+      </UserProvider>
+    </HelmetProvider>
+  );
+}
+
+export default App;
