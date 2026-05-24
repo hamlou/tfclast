@@ -11,10 +11,7 @@ import Navbar from '../components/Navbar';
 import { MapPin, Mail, Phone, Facebook, Instagram, Youtube, Send, Loader2, CheckCircle2, Trophy, Users, Calendar, ArrowRight } from 'lucide-react';
 import { auth } from '../firebase';
 
-// Fallback events shown if backend is unreachable
 const FALLBACK_EVENTS = [
-  { id: 'e1', name: 'TFC Canada Land Of Martial Arts', number: 82, date: '2024-09-03', location: 'Canada', status: 'upcoming', url: 'https://tfc-event.com/tfc-canada-land-of-martial-arts/', image: 'https://tfc-event.com/wp-content/uploads/2024/08/0079-THE.png' },
-  { id: 'e2', name: 'TFC Gladiators', number: 81, date: '2024-06-22', location: 'Jem, Mahdia, Tunisia', status: 'recent', url: 'https://tfc-event.com/tfc-gladiators/', image: 'https://tfc-event.com/wp-content/uploads/2024/08/WhatsApp-Image-2024-08-13-a-21.27.25_f7cede16.jpg' },
   { id: 'e3', name: 'The Raiders', number: 80, date: '2024-01-13', location: 'Sfax, Tunisia', status: 'past', url: 'https://tfc-event.com/tfc-raiders/', image: 'https://tfc-event.com/wp-content/uploads/2024/08/WhatsApp-Image-2024-08-13-a-21.27.07_f68082cc.jpg' },
   { id: 'e4', name: 'The War', number: 79, date: '2023-09-23', location: 'Sfax, Tunisia', status: 'past', url: 'https://tfc-event.com/tfc-the-war/', image: 'https://tfc-event.com/wp-content/uploads/2024/08/0079-THE.png' },
   { id: 'e5', name: 'Jungle Fight', number: 78, date: '2023-07-08', location: 'Sfax, Tunisia', status: 'past', url: 'https://tfc-event.com/tfc-jungle-fight/', image: 'https://tfc-event.com/wp-content/uploads/2023/01/WhatsApp-Image-2024-08-19-a-21.49.36_8d5fea11.jpg' },
@@ -23,24 +20,44 @@ const FALLBACK_EVENTS = [
   { id: 'e8', name: 'Titans Fight', number: 75, date: '2022-10-15', location: 'Sfax, Tunisia', status: 'past', url: 'https://tfc-event.com/tfc-titans-fights/', image: 'https://tfc-event.com/wp-content/uploads/2024/08/Titan-Fight-scaled.jpg' },
 ];
 
+import { useNavigate } from 'react-router-dom';
+
+// ... (in Home component)
 const Home = () => {
+  const navigate = useNavigate();
   const [activeVideo, setActiveVideo] = useState(null);
   const { user, addToHistory, hasActiveSubscription } = useUser();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const hardcodedItems = CATEGORIES.flatMap(c => c.items);
   const [firestoreVideos, setFirestoreVideos] = useState([]);
 
-  // Merge Firestore + hardcoded videos (deduplicate by title)
+  // Merge Firestore + hardcoded videos (deduplicate by title) and interleave free/pro
   const allItems = (() => {
     const titleSet = new Set();
+    const freeVideos = [];
+    const proVideos = [];
+    
+    const addVideo = (v) => {
+      const key = v.title?.toLowerCase();
+      if (key && !titleSet.has(key)) { 
+        titleSet.add(key);
+        if (v.isPremium || v.type === 'pro') {
+          proVideos.push(v);
+        } else {
+          freeVideos.push(v);
+        }
+      }
+    };
+
+    for (const v of firestoreVideos) addVideo(v);
+    for (const v of hardcodedItems) addVideo(v);
+
+    // Interleave free and pro for a mixed display
     const result = [];
-    for (const v of firestoreVideos) {
-      const key = v.title?.toLowerCase();
-      if (key && !titleSet.has(key)) { titleSet.add(key); result.push(v); }
-    }
-    for (const v of hardcodedItems) {
-      const key = v.title?.toLowerCase();
-      if (key && !titleSet.has(key)) { titleSet.add(key); result.push(v); }
+    const maxLen = Math.max(freeVideos.length, proVideos.length);
+    for (let i = 0; i < maxLen; i++) {
+      if (i < freeVideos.length) result.push(freeVideos[i]);
+      if (i < proVideos.length) result.push(proVideos[i]);
     }
     return result;
   })();

@@ -12,8 +12,8 @@ const DashboardLayout = () => {
       <Sidebar />
       <main className="flex-1 md:ml-20 lg:ml-64 pb-20 md:pb-0 overflow-x-hidden">
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
         >
           <Outlet />
