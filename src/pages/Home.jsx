@@ -295,7 +295,7 @@ const Home = () => {
               {[
                 { icon: Mail,  text: TFC_INFO.email, href: `mailto:${TFC_INFO.email}` },
                 { icon: Phone, text: TFC_INFO.phone,  href: `tel:${TFC_INFO.phone}` },
-                { icon: MapPin, text: 'Sfax, Tunisia', href: 'https://maps.google.com/?q=Sfax,Tunisia' },
+                { icon: MapPin, text: `${TFC_INFO.location}, ${TFC_INFO.country}`, href: `https://maps.google.com/?q=${encodeURIComponent(TFC_INFO.address)}` },
               ].map(({ icon: Icon, text, href }) => (
                 <a key={text} href={href} target="_blank" rel="noopener noreferrer" className="flex items-center space-x-4 group">
                   <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">

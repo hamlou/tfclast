@@ -60,7 +60,7 @@ const Terms = () => (
         </Section>
 
         <Section icon={Scale} title="9. Governing Law">
-          <p>These Terms are governed by the laws of Tunisia. Disputes shall be resolved in the courts of Sfax, Tunisia.</p>
+          <p>These Terms are governed by the laws of the United States. Disputes shall be resolved in the courts of California, United States.</p>
         </Section>
 
         <Section icon={Mail} title="10. Contact Us">

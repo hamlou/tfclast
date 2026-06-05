@@ -41,7 +41,7 @@ const Footer = () => {
             <li><Link to="/privacy-policy" className="text-gray-500 text-sm hover:text-primary transition-colors">Privacy Policy</Link></li>
             <li><Link to="/terms" className="text-gray-500 text-sm hover:text-primary transition-colors">Terms & Conditions</Link></li>
             <li><Link to="/delete-account" className="text-gray-500 text-sm hover:text-primary transition-colors">Delete Account</Link></li>
-            <li><a href="mailto:contact@tfc-event.com" className="text-gray-500 text-sm hover:text-primary transition-colors">Contact Us</a></li>
+            <li><a href="mailto:contact@tfc.events" className="text-gray-500 text-sm hover:text-primary transition-colors">Contact Us</a></li>
           </ul>
         </div>
       </div>

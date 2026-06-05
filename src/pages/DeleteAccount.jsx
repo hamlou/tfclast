@@ -130,7 +130,7 @@ const DeleteAccount = () => {
                   <li className="flex items-start space-x-2"><span className="text-red-400 mt-0.5">•</span><span>Watch history and saved lists</span></li>
                   <li className="flex items-start space-x-2"><span className="text-red-400 mt-0.5">•</span><span>Champion application data (if any)</span></li>
                 </ul>
-                <p className="text-gray-500 text-xs mt-4">Active subscriptions should be cancelled before deleting. Contact <a href="mailto:contact@tfc-event.com" className="text-primary hover:underline">contact@tfc-event.com</a> for help.</p>
+                <p className="text-gray-500 text-xs mt-4">Active subscriptions should be cancelled before deleting. Contact <a href="mailto:contact@tfc.events" className="text-primary hover:underline">contact@tfc.events</a> for help.</p>
               </div>
               <button onClick={() => setShowConfirm(true)}
                 className="w-full bg-red-600 hover:bg-red-700 text-white font-black py-4 rounded-2xl uppercase tracking-widest transition-all flex items-center justify-center space-x-2">
