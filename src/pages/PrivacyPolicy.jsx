@@ -105,9 +105,10 @@ const PrivacyPolicy = () => {
 
           <Section icon={Mail} title="Contact Us">
             <p>If you have any questions about this Privacy Policy or wish to exercise your data rights, please contact us:</p>
+            <p><strong className="text-white">Company:</strong> TFC EVENTS LLC</p>
             <p><strong className="text-white">Email:</strong> <a href="mailto:contact@tfc.events" className="text-primary hover:underline">contact@tfc.events</a></p>
             <p><strong className="text-white">Phone:</strong> +216 98 241 649</p>
-            <p><strong className="text-white">Address:</strong> Sfax, Tunisia</p>
+            <p><strong className="text-white">Address:</strong> 15442 Ventura Blvd, Suite 201-2304, Sherman Oaks, CA 91403, United States</p>
           </Section>
 
           {/* Data Safety Section for Google Play */}
