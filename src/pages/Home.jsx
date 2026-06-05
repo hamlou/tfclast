@@ -158,6 +158,35 @@ const Home = () => {
         </div>
       </div>
 
+      {/* ── SEARCH BAR ── */}
+      <section className="py-8 px-4 md:px-8 -mt-8 relative z-10">
+        <div className="max-w-2xl mx-auto">
+          <form 
+            onSubmit={(e) => {
+              e.preventDefault();
+              const searchInput = e.target.elements.search.value;
+              if (searchInput.trim()) {
+                navigate('/browse', { state: { searchQuery: searchInput.trim() } });
+              }
+            }}
+            className="relative flex items-center"
+          >
+            <input
+              name="search"
+              type="text"
+              placeholder="Search videos..."
+              className="w-full bg-surface/80 backdrop-blur-md border border-gray-800 rounded-2xl py-4 px-6 pr-32 text-white placeholder-gray-500 focus:outline-none focus:border-primary transition-all text-base"
+            />
+            <button
+              type="submit"
+              className="absolute right-2 bg-primary hover:bg-red-600 text-black font-black uppercase tracking-wider px-6 py-3 rounded-xl transition-all text-xs flex-shrink-0"
+            >
+              Search
+            </button>
+          </form>
+        </div>
+      </section>
+
       {/* ── TRENDING VIDEOS ── */}
       <section className="py-16 px-4 md:px-8">
         <div className="max-w-7xl mx-auto">
