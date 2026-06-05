@@ -8,7 +8,7 @@ export const TFC_INFO = {
   coFounder: 'GM. Tarek Mahdi',
   location: 'Sfax, Tunisia',
   address: '15442 Ventura Blvd Ste 201-2304, Sherman Oaks, 91403',
-  email: 'contact@tfc-event.com',
+  email: 'contact@tfc.events',
   phone: '+216 98 241 649',
   facebook: 'https://www.facebook.com/tfc.event1',
   instagram: 'https://www.instagram.com/tfc_events/',

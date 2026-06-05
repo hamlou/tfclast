@@ -36,7 +36,7 @@ const Terms = () => (
         </Section>
 
         <Section icon={CreditCard} title="3. Subscriptions & Payments">
-          <p>TFC offers free and paid plans. Paid plans auto-renew unless cancelled. Payments processed via Stripe or NOWPayments. Crypto payments are non-refundable once confirmed. Refunds handled case-by-case via contact@tfc-event.com.</p>
+          <p>TFC offers free and paid plans. Paid plans auto-renew unless cancelled. Payments processed via Stripe or NOWPayments. Crypto payments are non-refundable once confirmed. Refunds handled case-by-case via contact@tfc.events.</p>
         </Section>
 
         <Section icon={Scale} title="4. Content & Intellectual Property">
@@ -64,7 +64,7 @@ const Terms = () => (
         </Section>
 
         <Section icon={Mail} title="10. Contact Us">
-          <p><strong className="text-white">Email:</strong> <a href="mailto:contact@tfc-event.com" className="text-primary hover:underline">contact@tfc-event.com</a></p>
+          <p><strong className="text-white">Email:</strong> <a href="mailto:contact@tfc.events" className="text-primary hover:underline">contact@tfc.events</a></p>
           <p><strong className="text-white">Phone:</strong> +216 98 241 649</p>
           <p><strong className="text-white">Website:</strong> <a href="https://tfc-event.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">tfc-event.com</a></p>
         </Section>

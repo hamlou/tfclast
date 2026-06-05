@@ -86,7 +86,7 @@ const PrivacyPolicy = () => {
               <li><strong className="text-white">Access</strong> your personal data at any time through your profile and settings</li>
               <li><strong className="text-white">Update</strong> your personal information through your account settings</li>
               <li><strong className="text-white">Delete</strong> your account and all associated data (see below)</li>
-              <li><strong className="text-white">Export</strong> your data by contacting us at contact@tfc-event.com</li>
+              <li><strong className="text-white">Export</strong> your data by contacting us at contact@tfc.events</li>
               <li><strong className="text-white">Withdraw consent</strong> at any time by deleting your account</li>
             </ul>
           </Section>
@@ -105,7 +105,7 @@ const PrivacyPolicy = () => {
 
           <Section icon={Mail} title="Contact Us">
             <p>If you have any questions about this Privacy Policy or wish to exercise your data rights, please contact us:</p>
-            <p><strong className="text-white">Email:</strong> <a href="mailto:contact@tfc-event.com" className="text-primary hover:underline">contact@tfc-event.com</a></p>
+            <p><strong className="text-white">Email:</strong> <a href="mailto:contact@tfc.events" className="text-primary hover:underline">contact@tfc.events</a></p>
             <p><strong className="text-white">Phone:</strong> +216 98 241 649</p>
             <p><strong className="text-white">Address:</strong> Sfax, Tunisia</p>
           </Section>
