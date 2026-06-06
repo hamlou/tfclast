@@ -69,9 +69,14 @@ const Home = () => {
     for (const v of firestoreVideos) {
       if (videos.length >= 8) break;
       const titleLower = (v.title || '').toLowerCase();
+      const originalTitle = v.title || '';
       // Heuristic: titles with specific names or weights instead of generic "tfc event"
       const isGeneric = titleLower === 'tfc event' || titleLower.includes('full event');
-      if (!isGeneric && v.thumbnail && v.thumbnail.includes('maxresdefault')) {
+      const containsBudo = titleLower.includes('budo');
+      const containsEmoji = /[\p{Emoji_Presentation}\p{Extended_Pictographic}]/u.test(originalTitle);
+      const isProfessional = !isGeneric && !containsBudo && !containsEmoji;
+      
+      if (isProfessional && v.thumbnail && v.thumbnail.includes('maxresdefault')) {
         if (!videos.some(vid => vid.id === v.id)) videos.push(v);
       }
     }
