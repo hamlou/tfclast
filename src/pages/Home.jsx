@@ -236,7 +236,7 @@ const Home = () => {
           </div>
           
           {/* Watch More Link */}
-          <div className="text-center mt-12">
+          <div className="text-center mt-12 flex flex-col items-center">
             <button 
               onClick={() => navigate('/browse')}
               className="inline-flex items-center space-x-3 bg-primary/10 hover:bg-primary/20 border border-primary/40 hover:border-primary text-primary font-black uppercase text-xs tracking-widest py-4 px-10 rounded-2xl transition-all group"
@@ -244,6 +244,13 @@ const Home = () => {
               <span>Explore Full Video Library</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </button>
+            
+            <div className="max-w-2xl mt-8 px-4 text-center">
+              <h4 className="text-gray-400 font-bold text-[11px] uppercase tracking-widest mb-2">Exclusive Video Access</h4>
+              <p className="text-gray-500/70 text-[10px] leading-relaxed">
+                All videos displayed on this website are provided through unlisted YouTube links. These videos are not publicly listed or searchable on YouTube and are intended to be accessed exclusively through our platform. Users will not be able to discover this content through standard YouTube browsing or search functions.
+              </p>
+            </div>
           </div>
         </div>
       </section>
