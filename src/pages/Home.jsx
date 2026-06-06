@@ -61,26 +61,37 @@ const Home = () => {
     return result;
   })();
 
-  // ── TRENDING VIDEOS: Prioritize videos with guaranteed good thumbnails ──
+  // ── TRENDING VIDEOS: Prioritize attractive fighting thumbnails from API ──
   const trendingVideos = (() => {
-    // Start with our hand-picked hardcoded items (they have great thumbnails)
-    const videos = [...hardcodedItems];
+    const videos = [];
     
-    // Fill up to 8 with API videos that have a thumbnail defined
+    // First, look for actual fighting videos from the API (avoid generic "TFC Event" titles)
     for (const v of firestoreVideos) {
       if (videos.length >= 8) break;
-      if (!videos.some(vid => vid.id === v.id) && v.thumbnail) {
-        videos.push(v);
+      const titleLower = (v.title || '').toLowerCase();
+      // Heuristic: titles with specific names or weights instead of generic "tfc event"
+      const isGeneric = titleLower === 'tfc event' || titleLower.includes('full event');
+      if (!isGeneric && v.thumbnail && v.thumbnail.includes('maxresdefault')) {
+        if (!videos.some(vid => vid.id === v.id)) videos.push(v);
       }
     }
     
-    // If we still don't have 8, fill with remaining API videos
+    // If we still need more, take any API video with a good thumbnail
     for (const v of firestoreVideos) {
+      if (videos.length >= 8) break;
+      if (v.thumbnail && v.thumbnail.includes('maxresdefault')) {
+        if (!videos.some(vid => vid.id === v.id)) videos.push(v);
+      }
+    }
+    
+    // Fallback to hardcoded items if we don't have 8 yet
+    for (const v of hardcodedItems) {
       if (videos.length >= 8) break;
       if (!videos.some(vid => vid.id === v.id)) {
         videos.push(v);
       }
     }
+    
     return videos;
   })();
 
