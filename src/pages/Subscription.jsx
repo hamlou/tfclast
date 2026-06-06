@@ -107,7 +107,14 @@ const Subscription = () => {
       period: '5 mo',
       duration: '5 months',
       badge: '5 Months',
-      features: ['Access to all pro videos', '1080p & 4K Quality', 'Ad-Free', 'Priority Rewards'],
+      features: [
+        'Full access to all Pro videos',
+        '1080p & 4K Quality',
+        'Ad-Free Viewing',
+        'VIP Access',
+        'Priority Rewards',
+        'Exclusive Badges',
+      ],
     },
     {
       key: 'elite_premium',
@@ -117,7 +124,15 @@ const Subscription = () => {
       duration: '365 days',
       badge: 'Best Value',
       badgeColor: 'bg-emerald-500',
-      features: ['Access to all pro videos', '1080p & 4K Quality', 'Ad-Free', 'Priority Rewards', 'VIP Access', 'Exclusive Badges', 'Save more than 25%'],
+      features: [
+        'Full access to all Pro videos',
+        '1080p & 4K Quality',
+        'Ad-Free Viewing',
+        'VIP Access',
+        'Priority Rewards',
+        'Exclusive Badges',
+        'Save more than 25%',
+      ],
     },
   ];
 
@@ -159,7 +174,11 @@ const Subscription = () => {
 
       <div className="text-center mb-16">
         <h2 className="text-5xl font-black uppercase tracking-tighter mb-4">Choose Your Plan</h2>
-        <p className="text-gray-500 font-bold uppercase tracking-widest text-sm">Unlock the full TFC experience</p>
+        <p className="text-gray-500 font-bold uppercase tracking-widest text-sm mb-3">Unlock the full TFC experience</p>
+        <p className="text-gray-600 text-xs max-w-xl mx-auto leading-relaxed">
+          All plans include <span className="text-white font-bold">identical access</span> to every Pro video on the platform.
+          The only difference between plans is the <span className="text-primary font-bold">subscription duration</span>.
+        </p>
       </div>
 
       {/* ── Stripe Plans (existing) ── */}
@@ -193,6 +212,9 @@ const Subscription = () => {
                 <span className="text-4xl font-black text-white">{plan.price.split('/')[0]}</span>
                 <span className="text-gray-500 font-bold text-sm uppercase">/{plan.price.split('/')[1] || 'Forever'}</span>
               </div>
+              {plan.duration && (
+                <p className="text-gray-600 text-xs mt-1 font-bold uppercase tracking-wider">{plan.duration} access</p>
+              )}
             </div>
 
             <ul className="space-y-4 mb-10">
