@@ -61,6 +61,29 @@ const Home = () => {
     return result;
   })();
 
+  // ── TRENDING VIDEOS: Prioritize videos with guaranteed good thumbnails ──
+  const trendingVideos = (() => {
+    // Start with our hand-picked hardcoded items (they have great thumbnails)
+    const videos = [...hardcodedItems];
+    
+    // Fill up to 8 with API videos that have a thumbnail defined
+    for (const v of firestoreVideos) {
+      if (videos.length >= 8) break;
+      if (!videos.some(vid => vid.id === v.id) && v.thumbnail) {
+        videos.push(v);
+      }
+    }
+    
+    // If we still don't have 8, fill with remaining API videos
+    for (const v of firestoreVideos) {
+      if (videos.length >= 8) break;
+      if (!videos.some(vid => vid.id === v.id)) {
+        videos.push(v);
+      }
+    }
+    return videos;
+  })();
+
   // ── Events: fetch from backend, fall back to hardcoded data ─────────────
   const [events, setEvents] = useState([]);
   const [eventsLoading, setEventsLoading] = useState(true);
@@ -191,7 +214,7 @@ const Home = () => {
         <div className="max-w-7xl mx-auto">
           <h2 className="text-4xl md:text-5xl font-black text-white mb-12 text-center uppercase tracking-tighter">Trending Videos</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-            {allItems.slice(0, 8).map((item) => (
+            {trendingVideos.slice(0, 8).map((item) => (
               <ContentCard key={item.id} item={item} onPlay={handlePlay} />
             ))}
           </div>
