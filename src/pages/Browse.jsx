@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { CATEGORIES } from '../data/ContentData';
 import ContentCard from '../components/ContentCard';
 import { Search as SearchIcon, Filter } from 'lucide-react';
@@ -17,7 +18,14 @@ const Browse = () => {
   const [videosLoading, setVideosLoading] = useState(true);
   const [videosError, setVideosError] = useState(false);
   const [activeVideo, setActiveVideo] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
+  const location = useLocation();
+  const [searchQuery, setSearchQuery] = useState(location.state?.searchQuery || '');
+
+  useEffect(() => {
+    if (location.state?.searchQuery) {
+      setSearchQuery(location.state.searchQuery);
+    }
+  }, [location.state?.searchQuery]);
   const { user, addToHistory, hasActiveSubscription } = useUser();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
@@ -46,23 +54,19 @@ const Browse = () => {
     fetchVideos();
   }, []);
 
-  // Merge: Firestore videos first, then hardcoded ones (deduplicate by title)
+  // Merge: Firestore videos first, then hardcoded ones (deduplicate by id)
   const mergedItems = (() => {
-    const titleSet = new Set();
+    const idSet = new Set();
     const result = [];
     // Firestore videos take priority
     for (const v of firestoreVideos) {
-      const key = v.title?.toLowerCase();
-      if (key && !titleSet.has(key)) {
-        titleSet.add(key);
-        result.push(v);
-      }
+      if (v.id) idSet.add(v.id);
+      result.push(v);
     }
     // Then hardcoded videos
     for (const v of hardcodedItems) {
-      const key = v.title?.toLowerCase();
-      if (key && !titleSet.has(key)) {
-        titleSet.add(key);
+      if (!v.id || !idSet.has(v.id)) {
+        if (v.id) idSet.add(v.id);
         result.push(v);
       }
     }
@@ -72,7 +76,7 @@ const Browse = () => {
   // Real search filtering
   const filteredItems = searchQuery.trim()
     ? mergedItems.filter(item =>
-        item.title.toLowerCase().includes(searchQuery.toLowerCase())
+        item.title?.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : mergedItems;
 

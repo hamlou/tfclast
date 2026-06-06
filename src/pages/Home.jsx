@@ -31,16 +31,15 @@ const Home = () => {
   const hardcodedItems = CATEGORIES.flatMap(c => c.items);
   const [firestoreVideos, setFirestoreVideos] = useState([]);
 
-  // Merge Firestore + hardcoded videos (deduplicate by title) and interleave free/pro
+  // Merge Firestore + hardcoded videos (deduplicate by id) and interleave free/pro
   const allItems = (() => {
-    const titleSet = new Set();
+    const idSet = new Set();
     const freeVideos = [];
     const proVideos = [];
     
     const addVideo = (v) => {
-      const key = v.title?.toLowerCase();
-      if (key && !titleSet.has(key)) { 
-        titleSet.add(key);
+      if (!v.id || !idSet.has(v.id)) { 
+        if (v.id) idSet.add(v.id);
         if (v.isPremium || v.type === 'pro') {
           proVideos.push(v);
         } else {
