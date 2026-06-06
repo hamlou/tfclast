@@ -511,8 +511,8 @@ const VideoPlayer = ({ url, title, onClose }) => {
                     className="w-full h-2 bg-white/20 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:cursor-pointer"
                   />
                   <div className="flex justify-between text-xs text-gray-400 mt-2">
-                    <span>{formatTime(playedSeconds || played * (videoMetadata.duration || 600))}</span>
-                    <span>{formatTime(videoMetadata.duration || 600)}</span>
+                    <span>{formatTime(playedSeconds || played * (videoMetadata.duration || 0))}</span>
+                    <span>{videoMetadata.duration ? formatTime(videoMetadata.duration) : '--:--'}</span>
                   </div>
                 </div>
 
