@@ -145,21 +145,27 @@
 
     .mobile-brand {
         display: block;
-        font-family: 'Barlow Condensed', sans-serif;
-        font-size: 20px;
-        font-weight: 900;
-        color: #E01818;
-        text-transform: uppercase;
-        letter-spacing: 2px;
         margin-right: auto;
     }
 
+    .mobile-logo-img {
+        height: 28px;
+        width: auto;
+        object-fit: contain;
+    }
+
     .nav-menu.desktop {
-        display: none;
+        display: flex;
+        gap: 12px;
+    }
+
+    .nav-item {
+        font-size: 11px;
+        letter-spacing: 0.5px;
     }
 
     .mobile-toggle {
-        display: flex;
+        display: none;
     }
 
     .nav-menu.mobile {

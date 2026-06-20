@@ -57,7 +57,9 @@ const Navbar = () => {
         <nav className={`navbar ${isScrolled ? 'scrolled' : ''}`}>
             <div className="navbar-container">
                 {/* MOBILE BRAND */}
-                <span className="mobile-brand">TFC</span>
+                <div className="mobile-brand">
+                    <img src="/tfc-above-sidebar.png" alt="TFC Logo" className="mobile-logo-img" />
+                </div>
 
                 {/* DESKTOP MENU */}
                 <div className="nav-menu desktop">
@@ -66,25 +68,7 @@ const Navbar = () => {
                     ))}
                 </div>
 
-                {/* MOBILE TOGGLE */}
-                <button
-                    className={`mobile-toggle ${mobileMenuOpen ? 'open' : ''}`}
-                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                    aria-label="Toggle Menu"
-                >
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </button>
 
-                {/* MOBILE MENU */}
-                <div className={`nav-menu mobile ${mobileMenuOpen ? 'open' : ''}`}>
-                    {menuItems.map((item) => (
-                        <div key={item} onClick={() => setMobileMenuOpen(false)}>
-                            <NavItem label={item} />
-                        </div>
-                    ))}
-                </div>
             </div>
         </nav>
     );
