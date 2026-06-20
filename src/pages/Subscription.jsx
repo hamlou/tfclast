@@ -141,7 +141,7 @@ const Subscription = () => {
   const cryptoExpired = cryptoSub?.reason === 'expired';
 
   return (
-    <div className="p-4 md:p-8 lg:p-16 max-w-7xl mx-auto min-h-screen">
+    <div className="p-4 sm:p-8 md:p-16 max-w-7xl mx-auto min-h-screen">
       <SEO
         title="Subscription Plans"
         description="Choose the perfect TFC membership plan to unlock 4K HDR streaming and exclusive live events."
@@ -172,10 +172,10 @@ const Subscription = () => {
         )}
       </AnimatePresence>
 
-      <div className="text-center mb-8 md:mb-16">
-        <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tighter mb-3 md:mb-4">Choose Your Plan</h2>
-        <p className="text-gray-500 font-bold uppercase tracking-widest text-xs md:text-sm mb-2 md:mb-3">Unlock the full TFC experience</p>
-        <p className="text-gray-600 text-xs max-w-xl mx-auto leading-relaxed px-4">
+      <div className="text-center mb-10 sm:mb-16">
+        <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tighter mb-3 sm:mb-4">Choose Your Plan</h2>
+        <p className="text-gray-500 font-bold uppercase tracking-widest text-xs sm:text-sm mb-3">Unlock the full TFC experience</p>
+        <p className="text-gray-600 text-xs max-w-xl mx-auto leading-relaxed">
           All plans include <span className="text-white font-bold">identical access</span> to every Pro video on the platform.
           The only difference between plans is the <span className="text-primary font-bold">subscription duration</span>.
         </p>
@@ -187,7 +187,7 @@ const Subscription = () => {
           <motion.div
             key={plan.id}
             whileHover={{ y: -10 }}
-            className={`relative bg-surface p-5 md:p-8 rounded-2xl md:rounded-[2.5rem] border-2 transition-all ${user?.plan === plan.name ? 'border-primary shadow-2xl shadow-primary/20' : 'border-gray-800'}`}
+            className={`relative bg-surface p-5 sm:p-8 rounded-[2.5rem] border-2 transition-all ${user?.plan === plan.name ? 'border-primary shadow-2xl shadow-primary/20' : 'border-gray-800'}`}
           >
             {user?.plan === plan.name && (
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-black px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
@@ -206,8 +206,8 @@ const Subscription = () => {
               </div>
             )}
 
-            <div className="mb-5 md:mb-8">
-              <h3 className="text-xl md:text-2xl font-black uppercase mb-2 tracking-tight">{plan.name}</h3>
+            <div className="mb-8">
+              <h3 className="text-2xl font-black uppercase mb-2 tracking-tight">{plan.name}</h3>
               <div className="flex items-baseline space-x-1">
                 <span className="text-4xl font-black text-white">{plan.price.split('/')[0]}</span>
                 <span className="text-gray-500 font-bold text-sm uppercase">/{plan.price.split('/')[1] || 'Forever'}</span>
