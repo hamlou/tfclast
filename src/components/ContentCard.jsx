@@ -20,7 +20,7 @@ const ContentCard = ({ item, onPlay }) => {
   return (
     <motion.div 
       whileHover={{ y: -8 }}
-      className="relative flex-none w-full sm:w-56 md:w-72 group cursor-pointer"
+      className="relative w-full group cursor-pointer"
       onClick={() => onPlay(item)}
     >
       {/* Image Container */}

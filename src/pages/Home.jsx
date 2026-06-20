@@ -190,13 +190,13 @@ const Home = () => {
       <SEO title="Home" description="Stream the world's best live MMA events on TFC." />
       <Navbar />
 
-      {/* Fixed TFC logo top-right */}
-      <div className="fixed top-3 right-3 sm:top-5 sm:right-7 md:top-5 md:right-8 z-[1000] opacity-90">
-        <img src="/logo tfc in homejsx.png" alt="TFC Logo" className="w-16 sm:w-20 md:w-28 lg:w-32 h-auto drop-shadow-lg" />
+      {/* Fixed TFC logo top-right — hidden on mobile so it doesn't overlap the hamburger */}
+      <div className="hidden md:block" style={{ position: 'fixed', top: '20px', right: '30px', zIndex: 999, opacity: 0.9 }}>
+        <img src="/logo tfc in homejsx.png" alt="TFC Logo" style={{ width: '120px', height: 'auto', filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.5))' }} />
       </div>
 
       {/* ── HERO ── */}
-      <div id="home" className="relative w-full mt-10 sm:mt-12" style={{ height: '50vh', minHeight: '300px' }}>
+      <div id="home" className="relative w-full mt-14 md:mt-12" style={{ height: '40vh', minHeight: '280px' }}>
         <div className="absolute inset-0">
           <img src="/Screenshot 2026-01-30 231135.png" alt="MMA Platform" className="w-full h-full object-cover" style={{ filter: 'brightness(0.3) contrast(1.2)' }} />
           <div className="absolute inset-0 bg-black/50"></div>
@@ -237,26 +237,26 @@ const Home = () => {
       </section>
 
       {/* ── TRENDING VIDEOS ── */}
-      <section className="py-10 sm:py-16 px-4 md:px-8">
+      <section className="py-8 md:py-16 px-4 md:px-8">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-2xl sm:text-4xl md:text-5xl font-black text-white mb-8 sm:mb-12 text-center uppercase tracking-tighter">Trending Videos</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
+          <h2 className="text-3xl md:text-5xl font-black text-white mb-6 md:mb-12 text-center uppercase tracking-tighter">Trending Videos</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-8">
             {trendingVideos.slice(0, 8).map((item) => (
               <ContentCard key={item.id} item={item} onPlay={handlePlay} />
             ))}
           </div>
           
           {/* Watch More Link */}
-          <div className="text-center mt-12 flex flex-col items-center">
+          <div className="text-center mt-8 md:mt-12 flex flex-col items-center">
             <button 
               onClick={() => navigate('/browse')}
-              className="inline-flex items-center space-x-3 bg-primary/10 hover:bg-primary/20 border border-primary/40 hover:border-primary text-primary font-black uppercase text-xs tracking-widest py-4 px-10 rounded-2xl transition-all group"
+              className="inline-flex items-center space-x-2 bg-primary/10 hover:bg-primary/20 border border-primary/40 hover:border-primary text-primary font-black uppercase text-xs tracking-widest py-3 px-6 md:py-4 md:px-10 rounded-2xl transition-all group"
             >
               <span>Explore Full Video Library</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </button>
             
-            <div className="max-w-2xl mt-8 px-4 text-center">
+            <div className="max-w-2xl mt-6 px-4 text-center">
               <h4 className="text-gray-400 font-bold text-[11px] uppercase tracking-widest mb-2">Exclusive Video Access</h4>
               <p className="text-gray-500/70 text-[10px] leading-relaxed">
                 All videos displayed on this website are provided through unlisted YouTube links. These videos are not publicly listed or searchable on YouTube and are intended to be accessed exclusively through our platform. Users will not be able to discover this content through standard YouTube browsing or search functions.
@@ -267,19 +267,19 @@ const Home = () => {
       </section>
 
       {/* ── STATS — verified from tfc-event.com ── */}
-      <section className="py-8 sm:py-12 md:py-16 px-4 md:px-8 bg-gradient-to-b from-black to-gray-900">
+      <section className="py-8 md:py-16 px-4 md:px-8 bg-gradient-to-b from-black to-gray-900">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 md:gap-8 text-center">
+          <div className="grid grid-cols-3 md:grid-cols-3 gap-3 md:gap-8 text-center">
             {[
               { icon: Calendar, label: 'Championship Events', value: '82+', sub: 'Since 2015' },
               { icon: Trophy,   label: 'Weight Divisions',    value: '12',   sub: '8 Men\'s · 4 Women\'s' },
               { icon: Users,    label: 'Countries Reached',   value: '20+',  sub: 'Africa & worldwide' },
             ].map(({ icon: Icon, label, value, sub }) => (
-              <motion.div key={label} whileHover={{ y: -5 }} className="bg-surface border border-gray-800 rounded-2xl sm:rounded-3xl p-5 sm:p-8">
-                <Icon className="w-8 h-8 sm:w-10 sm:h-10 text-primary mx-auto mb-3 sm:mb-4" />
-                <div className="text-3xl sm:text-5xl font-black text-primary mb-1">{value}</div>
-                <div className="text-white font-bold uppercase text-[10px] sm:text-xs tracking-widest mb-1">{label}</div>
-                <div className="text-gray-600 text-[10px] sm:text-xs">{sub}</div>
+              <motion.div key={label} whileHover={{ y: -5 }} className="bg-surface border border-gray-800 rounded-2xl md:rounded-3xl p-4 md:p-8">
+                <Icon className="w-6 h-6 md:w-10 md:h-10 text-primary mx-auto mb-2 md:mb-4" />
+                <div className="text-2xl md:text-5xl font-black text-primary mb-1">{value}</div>
+                <div className="text-white font-bold uppercase text-[9px] md:text-xs tracking-widest mb-1 leading-tight">{label}</div>
+                <div className="text-gray-600 text-[9px] md:text-xs hidden sm:block">{sub}</div>
               </motion.div>
             ))}
           </div>
@@ -304,25 +304,25 @@ const Home = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 whileHover={{ x: 4 }}
-                className="flex flex-col md:flex-row md:items-center md:justify-between bg-surface border border-gray-800 hover:border-primary/50 rounded-2xl p-6 transition-all group"
+                className="flex flex-row items-center justify-between bg-surface border border-gray-800 hover:border-primary/50 rounded-2xl p-4 md:p-6 transition-all group"
               >
-                <div className="flex items-center space-x-4">
-                  <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
+                <div className="flex items-center space-x-3 md:space-x-4 min-w-0">
+                  <div className="w-12 h-12 md:w-14 md:h-14 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
                     {event.image
                       ? <img src={event.image} alt={event.name} className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity" />
                       : <span className="text-primary font-black text-sm">#{event.number}</span>
                     }
                   </div>
-                  <div>
-                    <h3 className="text-white font-black text-lg group-hover:text-primary transition-colors">{event.name}</h3>
-                    <p className="text-gray-500 text-sm">{event.location} · {new Date(event.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                  <div className="min-w-0">
+                    <h3 className="text-white font-black text-base md:text-lg group-hover:text-primary transition-colors truncate">{event.name}</h3>
+                    <p className="text-gray-500 text-xs md:text-sm truncate">{event.location} · {new Date(event.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
                   </div>
                 </div>
-                <div className="mt-3 md:mt-0 flex items-center space-x-3">
-                  <span className={`text-[10px] font-black uppercase px-3 py-1 rounded-full ${event.status === 'upcoming' ? 'bg-green-500/20 text-green-400' : event.status === 'recent' ? 'bg-primary/20 text-primary' : 'bg-gray-800 text-gray-400'}`}>
+                <div className="flex-shrink-0 flex flex-col items-end space-y-1 md:flex-row md:items-center md:space-y-0 md:space-x-3 ml-2">
+                  <span className={`text-[9px] md:text-[10px] font-black uppercase px-2 py-1 rounded-full ${event.status === 'upcoming' ? 'bg-green-500/20 text-green-400' : event.status === 'recent' ? 'bg-primary/20 text-primary' : 'bg-gray-800 text-gray-400'}`}>
                     {event.status}
                   </span>
-                  <span className="text-gray-500 text-xs">TFC #{event.number}</span>
+                  <span className="text-gray-500 text-[9px] md:text-xs">#{event.number}</span>
                 </div>
               </motion.a>
             ))}
@@ -338,20 +338,20 @@ const Home = () => {
       </section>
 
       {/* ── ABOUT ── */}
-      <section id="about" className="py-10 sm:py-16 md:py-20 px-4 md:px-8">
+      <section id="about" className="py-10 md:py-20 px-4 md:px-8">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-2xl sm:text-4xl md:text-5xl font-black text-white mb-6 md:mb-8 uppercase tracking-tighter">About TFC</h2>
-          <div className="bg-surface border border-gray-800 rounded-3xl p-6 md:p-10">
-            <p className="text-gray-300 text-base md:text-lg leading-relaxed mb-6 md:mb-8">{TFC_INFO.about}</p>
-            <div className="grid grid-cols-3 gap-3 md:gap-4 mb-6 md:mb-8 text-center">
+          <h2 className="text-3xl md:text-5xl font-black text-white mb-4 md:mb-8 uppercase tracking-tighter">About TFC</h2>
+          <div className="bg-surface border border-gray-800 rounded-2xl md:rounded-3xl p-5 md:p-10">
+            <p className="text-gray-300 text-sm md:text-lg leading-relaxed mb-5 md:mb-8">{TFC_INFO.about}</p>
+            <div className="grid grid-cols-3 gap-2 md:gap-4 mb-5 md:mb-8 text-center">
               {[
                 { label: 'Founded', value: TFC_INFO.founded },
                 { label: 'Based in', value: TFC_INFO.location },
-                { label: 'Events held', value: '82+' },
+                { label: 'Events', value: '82+' },
               ].map(({ label, value }) => (
-                <div key={label} className="bg-black/30 rounded-2xl p-4">
-                  <div className="text-2xl font-black text-primary">{value}</div>
-                  <div className="text-gray-500 text-xs uppercase tracking-widest mt-1">{label}</div>
+                <div key={label} className="bg-black/30 rounded-xl md:rounded-2xl p-3 md:p-4">
+                  <div className="text-xl md:text-2xl font-black text-primary">{value}</div>
+                  <div className="text-gray-500 text-[9px] md:text-xs uppercase tracking-widest mt-1">{label}</div>
                 </div>
               ))}
             </div>
@@ -371,9 +371,9 @@ const Home = () => {
       </section>
 
       {/* ── CONTACT ── */}
-      <section id="contact" className="py-10 sm:py-16 md:py-20 px-4 md:px-8 bg-gradient-to-b from-black to-gray-900">
+      <section id="contact" className="py-10 md:py-20 px-4 md:px-8 bg-gradient-to-b from-black to-gray-900">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-2xl sm:text-4xl md:text-5xl font-black text-white mb-6 sm:mb-8 md:mb-12 text-center uppercase tracking-tighter">Contact Us</h2>
+          <h2 className="text-3xl md:text-5xl font-black text-white mb-6 md:mb-12 text-center uppercase tracking-tighter">Contact Us</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
             <div className="space-y-6">
               <h3 className="text-white text-xl font-black uppercase tracking-tight">Get In Touch</h3>
