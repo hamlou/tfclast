@@ -130,8 +130,8 @@
         width: 100%;
         border-radius: 0;
         height: 56px;
-        padding: 0 16px;
-        justify-content: flex-end;
+        padding: 0 20px;
+        justify-content: space-between;
         gap: 0;
         border: none;
         border-bottom: 1px solid rgba(224, 24, 24, 0.15);
@@ -145,23 +145,23 @@
 
     .mobile-brand {
         display: block;
-        margin-right: auto;
+        margin-right: 0;
     }
 
     .mobile-logo-img {
-        height: 28px;
+        height: 32px;
         width: auto;
         object-fit: contain;
     }
 
     .nav-menu.desktop {
         display: flex;
-        gap: 12px;
+        gap: 15px;
     }
 
     .nav-item {
-        font-size: 11px;
-        letter-spacing: 0.5px;
+        font-size: 14px;
+        letter-spacing: 0.8px;
     }
 
     .mobile-toggle {
