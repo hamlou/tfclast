@@ -27,10 +27,11 @@ const Browse = () => {
       setSearchQuery(location.state.searchQuery);
     }
   }, [location.state?.searchQuery]);
+
   const { user, addToHistory, hasActiveSubscription } = useUser();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
-  // Fetch admin-managed videos from Firestore — send auth token so subscribers get premium URLs
+  // Fetch admin-managed videos from Firestore
   useEffect(() => {
     const fetchVideos = async () => {
       setVideosLoading(true);
@@ -57,36 +58,22 @@ const Browse = () => {
     fetchVideos();
   }, []);
 
-  // Merge: Firestore videos first, then hardcoded ones. Deduplicate by YouTube ID first.
+  // Merge & deduplicate
   const mergedItems = (() => {
     const seen = new Set();
     const result = [];
-
     const addVideo = (v) => {
       const key = getVideoDeduplicationKey(v);
       if (key && seen.has(key)) return;
       if (key) seen.add(key);
       result.push(v);
     };
-
     for (const v of firestoreVideos) addVideo(v);
     for (const v of hardcodedItems) addVideo(v);
-
     return result;
   })();
 
-  // Real search filtering
-  const filteredItems = searchQuery.trim()
-    ? mergedItems.filter(item =>
-        item.title?.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : mergedItems;
-
-  const handlePlay = (item) => {
-    if (item.isPremium && !hasActiveSubscription()) {
-      setShowUpgradeModal(true);
-
-  // Real search filtering
+  // Search filter
   const filteredItems = searchQuery.trim()
     ? mergedItems.filter(item =>
         item.title?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -114,7 +101,9 @@ const Browse = () => {
         <div>
           <h2 className="text-2xl md:text-4xl font-black uppercase tracking-tighter mb-1">Explore Content</h2>
           <p className="text-gray-500 font-bold uppercase text-[10px] tracking-widest">
-            {searchQuery ? `${filteredItems.length} result${filteredItems.length !== 1 ? 's' : ''} for "${searchQuery}"` : 'Discover your next favorite show'}
+            {searchQuery
+              ? `${filteredItems.length} result${filteredItems.length !== 1 ? 's' : ''} for "${searchQuery}"`
+              : 'Discover your next favorite show'}
           </p>
         </div>
         <div className="flex items-center space-x-2">
