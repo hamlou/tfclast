@@ -449,12 +449,12 @@ const VideoPlayer = ({ url, title, onClose }) => {
               className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/70 flex flex-col justify-between pointer-events-none"
             >
               {/* Top Bar */}
-              <div className="flex justify-between items-start p-6 pointer-events-auto" style={{ zIndex: 300 }}>
+              <div className="flex justify-between items-start p-3 sm:p-6 pointer-events-auto" style={{ zIndex: 300 }}>
                 <div>
-                  <h3 className="text-xl font-bold text-white uppercase tracking-wider drop-shadow-lg">
+                  <h3 className="text-base sm:text-xl font-bold text-white uppercase tracking-wider drop-shadow-lg">
                     {videoMetadata.title || title}
                   </h3>
-                  <p className="text-sm text-gray-300 mt-1">
+                  <p className="text-xs sm:text-sm text-gray-300 mt-1">
                     {videoMetadata.duration ? formatTime(videoMetadata.duration) : 'Now Playing'}
                   </p>
                 </div>
@@ -496,7 +496,7 @@ const VideoPlayer = ({ url, title, onClose }) => {
               </div>
 
               {/* Bottom Controls */}
-              <div className="p-6 pointer-events-auto">
+              <div className="p-3 sm:p-6 pointer-events-auto">
                 {/* Progress Bar */}
                 <div className="mb-4">
                   <input
@@ -518,7 +518,7 @@ const VideoPlayer = ({ url, title, onClose }) => {
 
                 {/* Control Buttons */}
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-2 sm:space-x-4">
                     {/* Play/Pause */}
                     <button 
                       onClick={() => setPlaying(!playing)} 
@@ -526,28 +526,28 @@ const VideoPlayer = ({ url, title, onClose }) => {
                       title={playing ? 'Pause' : 'Play'}
                     >
                       {playing ? (
-                        <Pause className="w-8 h-8 fill-white" />
+                        <Pause className="w-6 h-6 sm:w-8 sm:h-8 fill-white" />
                       ) : (
-                        <Play className="w-8 h-8 fill-white" />
+                        <Play className="w-6 h-6 sm:w-8 sm:h-8 fill-white" />
                       )}
                     </button>
 
                     {/* Skip Back 10s */}
                     <button 
                       onClick={() => skipTime(-10)} 
-                      className="p-2 hover:bg-white/10 rounded-full text-white transition-all"
+                      className="p-1.5 sm:p-2 hover:bg-white/10 rounded-full text-white transition-all"
                       title="Skip back 10 seconds"
                     >
-                      <SkipBack className="w-6 h-6" />
+                      <SkipBack className="w-5 h-5 sm:w-6 sm:h-6" />
                     </button>
 
                     {/* Skip Forward 10s */}
                     <button 
                       onClick={() => skipTime(10)} 
-                      className="p-2 hover:bg-white/10 rounded-full text-white transition-all"
+                      className="p-1.5 sm:p-2 hover:bg-white/10 rounded-full text-white transition-all"
                       title="Skip forward 10 seconds"
                     >
-                      <SkipForward className="w-6 h-6" />
+                      <SkipForward className="w-5 h-5 sm:w-6 sm:h-6" />
                     </button>
 
                     {/* Volume */}
@@ -574,11 +574,11 @@ const VideoPlayer = ({ url, title, onClose }) => {
                     </div>
                   </div>
 
-                  <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-2 sm:space-x-4">
                     {/* Playback Speed */}
                     <button 
                       onClick={handlePlaybackRateChange} 
-                      className="px-3 py-1.5 text-sm hover:bg-white/10 rounded-full text-white transition-all border border-white/20"
+                      className="px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm hover:bg-white/10 rounded-full text-white transition-all border border-white/20"
                       title="Playback speed"
                     >
                       {playbackRate}x
@@ -627,13 +627,13 @@ const VideoPlayer = ({ url, title, onClose }) => {
                     {/* Fullscreen */}
                     <button 
                       onClick={toggleFullscreen} 
-                      className="p-2 hover:bg-white/10 rounded-full text-white transition-all"
+                      className="p-1.5 sm:p-2 hover:bg-white/10 rounded-full text-white transition-all"
                       title={fullscreen ? 'Exit fullscreen' : 'Fullscreen'}
                     >
                       {fullscreen ? (
-                        <Minimize className="w-6 h-6" />
+                        <Minimize className="w-5 h-5 sm:w-6 sm:h-6" />
                       ) : (
-                        <Maximize className="w-6 h-6" />
+                        <Maximize className="w-5 h-5 sm:w-6 sm:h-6" />
                       )}
                     </button>
                   </div>

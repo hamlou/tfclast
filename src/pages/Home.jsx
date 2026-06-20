@@ -191,12 +191,12 @@ const Home = () => {
       <Navbar />
 
       {/* Fixed TFC logo top-right */}
-      <div style={{ position: 'fixed', top: '20px', right: '30px', zIndex: 1000, opacity: 0.9 }}>
-        <img src="/logo tfc in homejsx.png" alt="TFC Logo" style={{ width: '120px', height: 'auto', filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.5))' }} />
+      <div className="fixed top-3 right-3 sm:top-5 sm:right-7 md:top-5 md:right-8 z-[1000] opacity-90">
+        <img src="/logo tfc in homejsx.png" alt="TFC Logo" className="w-16 sm:w-20 md:w-28 lg:w-32 h-auto drop-shadow-lg" />
       </div>
 
       {/* ── HERO ── */}
-      <div id="home" className="relative w-full mt-12" style={{ height: '50vh', minHeight: '400px' }}>
+      <div id="home" className="relative w-full mt-10 sm:mt-12" style={{ height: '50vh', minHeight: '300px' }}>
         <div className="absolute inset-0">
           <img src="/Screenshot 2026-01-30 231135.png" alt="MMA Platform" className="w-full h-full object-cover" style={{ filter: 'brightness(0.3) contrast(1.2)' }} />
           <div className="absolute inset-0 bg-black/50"></div>
@@ -224,11 +224,11 @@ const Home = () => {
               name="search"
               type="text"
               placeholder="Search videos..."
-              className="w-full bg-surface/80 backdrop-blur-md border border-gray-800 rounded-2xl py-4 px-6 pr-32 text-white placeholder-gray-500 focus:outline-none focus:border-primary transition-all text-base"
+              className="w-full bg-surface/80 backdrop-blur-md border border-gray-800 rounded-2xl py-3 sm:py-4 px-4 sm:px-6 pr-24 sm:pr-32 text-white placeholder-gray-500 focus:outline-none focus:border-primary transition-all text-sm sm:text-base"
             />
             <button
               type="submit"
-              className="absolute right-2 bg-primary hover:bg-red-600 text-black font-black uppercase tracking-wider px-6 py-3 rounded-xl transition-all text-xs flex-shrink-0"
+              className="absolute right-2 bg-primary hover:bg-red-600 text-black font-black uppercase tracking-wider px-4 sm:px-6 py-2 sm:py-3 rounded-xl transition-all text-[10px] sm:text-xs flex-shrink-0"
             >
               Search
             </button>
@@ -237,10 +237,10 @@ const Home = () => {
       </section>
 
       {/* ── TRENDING VIDEOS ── */}
-      <section className="py-16 px-4 md:px-8">
+      <section className="py-10 sm:py-16 px-4 md:px-8">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-black text-white mb-12 text-center uppercase tracking-tighter">Trending Videos</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+          <h2 className="text-2xl sm:text-4xl md:text-5xl font-black text-white mb-8 sm:mb-12 text-center uppercase tracking-tighter">Trending Videos</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
             {trendingVideos.slice(0, 8).map((item) => (
               <ContentCard key={item.id} item={item} onPlay={handlePlay} />
             ))}
@@ -267,19 +267,19 @@ const Home = () => {
       </section>
 
       {/* ── STATS — verified from tfc-event.com ── */}
-      <section className="py-12 md:py-16 px-4 md:px-8 bg-gradient-to-b from-black to-gray-900">
+      <section className="py-8 sm:py-12 md:py-16 px-4 md:px-8 bg-gradient-to-b from-black to-gray-900">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 text-center">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 md:gap-8 text-center">
             {[
               { icon: Calendar, label: 'Championship Events', value: '82+', sub: 'Since 2015' },
               { icon: Trophy,   label: 'Weight Divisions',    value: '12',   sub: '8 Men\'s · 4 Women\'s' },
               { icon: Users,    label: 'Countries Reached',   value: '20+',  sub: 'Africa & worldwide' },
             ].map(({ icon: Icon, label, value, sub }) => (
-              <motion.div key={label} whileHover={{ y: -5 }} className="bg-surface border border-gray-800 rounded-3xl p-8">
-                <Icon className="w-10 h-10 text-primary mx-auto mb-4" />
-                <div className="text-5xl font-black text-primary mb-1">{value}</div>
-                <div className="text-white font-bold uppercase text-xs tracking-widest mb-1">{label}</div>
-                <div className="text-gray-600 text-xs">{sub}</div>
+              <motion.div key={label} whileHover={{ y: -5 }} className="bg-surface border border-gray-800 rounded-2xl sm:rounded-3xl p-5 sm:p-8">
+                <Icon className="w-8 h-8 sm:w-10 sm:h-10 text-primary mx-auto mb-3 sm:mb-4" />
+                <div className="text-3xl sm:text-5xl font-black text-primary mb-1">{value}</div>
+                <div className="text-white font-bold uppercase text-[10px] sm:text-xs tracking-widest mb-1">{label}</div>
+                <div className="text-gray-600 text-[10px] sm:text-xs">{sub}</div>
               </motion.div>
             ))}
           </div>
@@ -287,9 +287,9 @@ const Home = () => {
       </section>
 
       {/* ── EVENTS — fetched from backend ── */}
-      <section id="events" className="py-16 md:py-20 px-4 md:px-8 bg-gradient-to-b from-gray-900 to-black">
+      <section id="events" className="py-10 sm:py-16 md:py-20 px-4 md:px-8 bg-gradient-to-b from-gray-900 to-black">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-black text-white mb-2 text-center uppercase tracking-tighter">TFC Events</h2>
+          <h2 className="text-2xl sm:text-4xl md:text-5xl font-black text-white mb-2 text-center uppercase tracking-tighter">TFC Events</h2>
           <p className="text-gray-500 text-center font-bold uppercase text-xs tracking-widest mb-8 md:mb-12">Championship history &amp; upcoming events</p>
           {eventsLoading ? (
             <div className="flex justify-center py-16">
@@ -338,9 +338,9 @@ const Home = () => {
       </section>
 
       {/* ── ABOUT ── */}
-      <section id="about" className="py-16 md:py-20 px-4 md:px-8">
+      <section id="about" className="py-10 sm:py-16 md:py-20 px-4 md:px-8">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl font-black text-white mb-6 md:mb-8 uppercase tracking-tighter">About TFC</h2>
+          <h2 className="text-2xl sm:text-4xl md:text-5xl font-black text-white mb-6 md:mb-8 uppercase tracking-tighter">About TFC</h2>
           <div className="bg-surface border border-gray-800 rounded-3xl p-6 md:p-10">
             <p className="text-gray-300 text-base md:text-lg leading-relaxed mb-6 md:mb-8">{TFC_INFO.about}</p>
             <div className="grid grid-cols-3 gap-3 md:gap-4 mb-6 md:mb-8 text-center">
@@ -371,9 +371,9 @@ const Home = () => {
       </section>
 
       {/* ── CONTACT ── */}
-      <section id="contact" className="py-16 md:py-20 px-4 md:px-8 bg-gradient-to-b from-black to-gray-900">
+      <section id="contact" className="py-10 sm:py-16 md:py-20 px-4 md:px-8 bg-gradient-to-b from-black to-gray-900">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-black text-white mb-8 md:mb-12 text-center uppercase tracking-tighter">Contact Us</h2>
+          <h2 className="text-2xl sm:text-4xl md:text-5xl font-black text-white mb-6 sm:mb-8 md:mb-12 text-center uppercase tracking-tighter">Contact Us</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
             <div className="space-y-6">
               <h3 className="text-white text-xl font-black uppercase tracking-tight">Get In Touch</h3>

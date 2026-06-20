@@ -76,3 +76,24 @@
   transform: translateY(0);
   transition: opacity 400ms, transform 400ms;
 }
+
+/* Safe area for modern phones with notches */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Prevent horizontal overflow on mobile */
+* {
+  max-width: 100%;
+}
+
+img, video, iframe {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Fix mobile viewport height issues */
+.min-h-screen {
+  min-height: 100vh;
+  min-height: 100dvh;
+}

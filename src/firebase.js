@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, GoogleAuthProvider, signInWithPopup, applyActionCode, confirmPasswordReset } from 'firebase/auth';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, applyActionCode, confirmPasswordReset } from 'firebase/auth';
 import { getFirestore, doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
 
 const firebaseConfig = {
@@ -31,8 +31,13 @@ const friendlyError = (code) => {
     'auth/wrong-password': 'Incorrect password.',
     'auth/user-disabled': 'This account has been disabled. Contact support.',
     'auth/too-many-requests': 'Too many attempts. Please wait a few minutes and try again.',
+    'auth/unauthorized-domain': 'Google sign-in is not available on this domain. Please add it to Firebase Console authorized domains.',
+    'auth/popup-closed-by-user': 'Sign-in was cancelled. Please try again.',
+    'auth/cancelled-popup-request': 'Sign-in was cancelled. Please try again.',
+    'auth/popup-blocked': 'Pop-up was blocked by your browser. Please allow pop-ups and try again.',
+    'auth/account-exists-with-different-credential': 'An account already exists with this email using a different sign-in method.',
   };
-  return map[code] || 'Something went wrong. Please try again.';
+  return map[code] || `Authentication error: ${code || 'unknown'}`;
 };
 
 // ─── Sign Up ──────────────────────────────────────────────────────────────────
@@ -97,28 +102,56 @@ export const signIn = async (email, password) => {
   }
 };
 
+// ─── Mobile detection ────────────────────────────────────────────────────────
+const isMobile = () => /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
 // ─── Google Sign In ───────────────────────────────────────────────────────────
 export const signInWithGoogle = async () => {
   try {
     const provider = new GoogleAuthProvider();
-    const userCredential = await signInWithPopup(auth, provider);
-    const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
-
-    if (userDoc.exists()) {
-      return { success: true, user: userCredential.user, username: userDoc.data().username, isNewUser: false };
-    } else {
-      const userData = {
-        uid: userCredential.user.uid,
-        email: userCredential.user.email,
-        username: userCredential.user.displayName || userCredential.user.email.split('@')[0],
-        createdAt: new Date().toISOString(),
-        emailVerified: true,
-        provider: 'google',
-      };
-      await setDoc(doc(db, 'users', userCredential.user.uid), userData);
-      return { success: true, user: userCredential.user, username: userData.username, isNewUser: true };
+    // Use redirect on mobile (popup is blocked/unreliable), popup on desktop
+    if (isMobile()) {
+      await signInWithRedirect(auth, provider);
+      // Page will redirect — code below won't run until return
+      return { success: false, error: 'redirect-in-progress' };
     }
+    const userCredential = await signInWithPopup(auth, provider);
+    return await processGoogleUser(userCredential.user);
   } catch (error) {
+    console.error('Google Sign-In error:', error.code, error.message);
+    return { success: false, error: friendlyError(error.code) };
+  }
+};
+
+// ─── Process Google user (shared by popup + redirect) ─────────────────────────
+const processGoogleUser = async (user) => {
+  const userDoc = await getDoc(doc(db, 'users', user.uid));
+  if (userDoc.exists()) {
+    return { success: true, user, username: userDoc.data().username, isNewUser: false };
+  } else {
+    const userData = {
+      uid: user.uid,
+      email: user.email,
+      username: user.displayName || user.email.split('@')[0],
+      createdAt: new Date().toISOString(),
+      emailVerified: true,
+      provider: 'google',
+    };
+    await setDoc(doc(db, 'users', user.uid), userData);
+    return { success: true, user, username: userData.username, isNewUser: true };
+  }
+};
+
+// ─── Check redirect result (call on Login page mount) ───────────────────────────
+export const checkGoogleRedirectResult = async () => {
+  try {
+    const result = await getRedirectResult(auth);
+    if (result && result.user) {
+      return await processGoogleUser(result.user);
+    }
+    return null; // No redirect result
+  } catch (error) {
+    console.error('Google redirect result error:', error.code, error.message);
     return { success: false, error: friendlyError(error.code) };
   }
 };

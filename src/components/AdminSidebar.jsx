@@ -5,9 +5,14 @@ import { useUser } from '../context/UserContext';
 
 import { motion } from 'framer-motion';
 
-const AdminSidebar = () => {
+const AdminSidebar = ({ onClose }) => {
   const navigate = useNavigate();
   const { setIsLogoutModalOpen } = useUser();
+  
+  const handleNavigate = (path) => {
+    navigate(path);
+    if (onClose) onClose();
+  };
   
   const menuItems = [
     { label: 'Dashboard',     icon: LayoutDashboard, path: '/admin' },
@@ -21,7 +26,7 @@ const AdminSidebar = () => {
   ];
 
   return (
-    <div className="w-80 h-full bg-surface border-r border-gray-800 flex flex-col p-8 space-y-12">
+    <div className="w-64 sm:w-80 h-full bg-surface border-r border-gray-800 flex flex-col p-6 sm:p-8 space-y-8 sm:space-y-12 overflow-y-auto no-scrollbar">
       <div>
         <div className="flex items-center space-x-4 mb-8">
           <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center text-black font-black text-2xl italic">T</div>
@@ -46,12 +51,13 @@ const AdminSidebar = () => {
             key={item.label}
             to={item.path}
             end={item.path === '/admin'}
+            onClick={() => onClose && onClose()}
             className={({ isActive }) => `
-              flex items-center space-x-4 px-6 py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-all group
+              flex items-center space-x-3 sm:space-x-4 px-4 sm:px-6 py-3 sm:py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] sm:text-xs transition-all group
               ${isActive ? 'bg-primary text-black shadow-lg shadow-primary/20' : 'text-gray-500 hover:bg-white/5 hover:text-white'}
             `}
           >
-            <item.icon className="w-5 h-5" />
+            <item.icon className="w-4 h-4 sm:w-5 sm:h-5" />
             <span>{item.label}</span>
             {item.path === '/admin' && (
               <div className="ml-auto w-1.5 h-1.5 bg-current rounded-full" />

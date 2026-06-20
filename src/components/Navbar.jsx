@@ -56,6 +56,9 @@ const Navbar = () => {
     return (
         <nav className={`navbar ${isScrolled ? 'scrolled' : ''}`}>
             <div className="navbar-container">
+                {/* MOBILE BRAND */}
+                <span className="mobile-brand">TFC</span>
+
                 {/* DESKTOP MENU */}
                 <div className="nav-menu desktop">
                     {menuItems.map((item) => (

@@ -29,19 +29,19 @@ const Search = () => {
   };
 
   return (
-    <div className="p-8 md:p-16 max-w-7xl mx-auto min-h-screen">
+    <div className="p-4 sm:p-8 md:p-16 max-w-7xl mx-auto min-h-screen">
       <SEO title="Search" description="Search TFC content library." />
-      <h2 className="text-4xl font-black uppercase tracking-tighter mb-8">Search</h2>
+      <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tighter mb-6 sm:mb-8">Search</h2>
 
-      <div className="relative max-w-2xl mb-12">
-        <SearchIcon className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+      <div className="relative max-w-2xl mb-8 sm:mb-12">
+        <SearchIcon className="absolute left-4 sm:left-5 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-500" />
         <input
           autoFocus
           type="text"
           placeholder="Search for events, fighters, shows..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="w-full bg-surface border border-gray-800 rounded-2xl py-5 pl-14 pr-6 text-base focus:outline-none focus:border-primary transition-all"
+          className="w-full bg-surface border border-gray-800 rounded-2xl py-4 sm:py-5 pl-10 sm:pl-14 pr-4 sm:pr-6 text-sm sm:text-base focus:outline-none focus:border-primary transition-all"
         />
       </div>
 
@@ -59,7 +59,7 @@ const Search = () => {
           <p className="text-gray-500 font-bold uppercase text-[10px] tracking-widest mb-8">
             {results.length} result{results.length !== 1 ? 's' : ''} found
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
             {results.map(item => (
               <ContentCard key={item.id} item={item} onPlay={handlePlay} />
             ))}

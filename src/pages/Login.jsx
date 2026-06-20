@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useUser } from '../context/UserContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import SEO from '../components/SEO';
-import { signIn, signUp, signInWithGoogle } from '../firebase';
+import { signIn, signUp, signInWithGoogle, checkGoogleRedirectResult } from '../firebase';
 import './Login.css';
 
 export default function Login() {
@@ -45,6 +45,37 @@ export default function Login() {
       }, 5000);
     }
   }, [location, navigate]);
+
+  /* ── Check for Google redirect result (mobile flow) ── */
+  useEffect(() => {
+    let cancelled = false;
+    const handleRedirect = async () => {
+      setIsLoading(true);
+      const result = await checkGoogleRedirectResult();
+      if (cancelled) return;
+      setIsLoading(false);
+
+      if (!result) return; // No redirect result — normal page load
+
+      if (result.success) {
+        console.log('✅ Google redirect sign-in successful:', result.user.email);
+        login(result.user.email, 'google-oauth', result.username);
+        setSuccessMessage(`Welcome, ${result.username || result.user.displayName || result.user.email}!`);
+      } else {
+        const rawError = result.error || '';
+        let errorMsg = rawError || 'Google sign-in failed. Please try again.';
+        if (rawError.includes('unauthorized-domain')) {
+          errorMsg = 'Google sign-in is not configured for this domain.';
+        } else if (rawError.includes('cancelled') || rawError.includes('popup-closed')) {
+          errorMsg = 'Sign-in was cancelled. Please try again.';
+        }
+        console.error('Google redirect failed:', rawError);
+        setErrorMessage(errorMsg);
+      }
+    };
+    handleRedirect();
+    return () => { cancelled = true; };
+  }, []);
 
   /* ── Password strength logic (mirrors checkPw in tfc-auth.html) ── */
   const [signupPassword, setSignupPassword] = useState('');
@@ -222,15 +253,20 @@ export default function Login() {
           }
         }
       } else {
-        // Google sign-in failed - show error
-        let errorMsg = 'Unable to sign in with Google. Please try again.';
-        if (result.error?.includes('unauthorized-domain') || result.error?.includes('auth/unauthorized-domain')) {
-          errorMsg = 'Google sign-in is not available right now. Please use email and password instead.';
-        } else if (result.error?.includes('popup-closed') || result.error?.includes('cancelled')) {
+        // Google sign-in failed - show the actual error from Firebase
+        const rawError = result.error || '';
+        let errorMsg = rawError || 'Unable to sign in with Google. Please try again.';
+        
+        if (rawError.includes('unauthorized-domain') || rawError.includes('auth/unauthorized-domain')) {
+          errorMsg = 'Google sign-in is not configured for this domain. Please use email and password instead, or contact support.';
+        } else if (rawError.includes('popup-closed') || rawError.includes('cancelled')) {
           errorMsg = 'Sign-in was cancelled. Please try again.';
-        } else if (result.error?.includes('network')) {
+        } else if (rawError.includes('popup-blocked')) {
+          errorMsg = 'Pop-up was blocked by your browser. Please allow pop-ups for this site and try again.';
+        } else if (rawError.includes('network')) {
           errorMsg = 'No internet connection. Please check your network and try again.';
         }
+        console.error('Google Sign-In failed:', rawError);
         setErrorMessage(errorMsg);
       }
     } catch (error) {

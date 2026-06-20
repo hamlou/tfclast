@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 
 const Footer = () => {
   return (
-    <footer className="bg-surface border-t border-gray-800/50 py-16 px-8 md:px-24">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
+    <footer className="bg-surface border-t border-gray-800/50 py-12 sm:py-16 px-4 sm:px-8 md:px-24 pb-24 md:pb-16">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 sm:gap-12">
         <div className="col-span-1 md:col-span-2">
           <h2 className="text-3xl font-black text-primary italic mb-6">TFC</h2>
           <p className="text-gray-500 max-w-sm mb-8 leading-relaxed">
@@ -38,7 +38,7 @@ const Footer = () => {
         </div>
       </div>
       
-      <div className="max-w-7xl mx-auto mt-16 pt-8 border-t border-gray-800/50 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+      <div className="max-w-7xl mx-auto mt-12 sm:mt-16 pt-8 border-t border-gray-800/50 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
         <p className="text-gray-600 text-xs font-bold uppercase tracking-widest">
           © 2026 TFC NETWORK. ALL RIGHTS RESERVED.
         </p>

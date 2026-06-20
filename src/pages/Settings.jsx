@@ -9,17 +9,17 @@ import { deleteUser, reauthenticateWithCredential, EmailAuthProvider } from 'fir
 import { doc, deleteDoc } from 'firebase/firestore';
 
 const SettingRow = ({ icon: Icon, title, description, children, danger = false }) => (
-  <div className={`flex items-center justify-between p-5 bg-surface rounded-2xl border ${danger ? 'border-red-900/40' : 'border-gray-800'}`}>
-    <div className="flex items-center space-x-4">
+  <div className={`flex items-center justify-between p-4 sm:p-5 bg-surface rounded-xl sm:rounded-2xl border ${danger ? 'border-red-900/40' : 'border-gray-800'}`}>
+    <div className="flex items-center space-x-3 sm:space-x-4 min-w-0">
       <div className={`p-2 rounded-xl flex-shrink-0 ${danger ? 'bg-red-500/10' : 'bg-white/5'}`}>
-        <Icon className={`w-5 h-5 ${danger ? 'text-red-400' : 'text-primary'}`} />
+        <Icon className={`w-4 h-4 sm:w-5 sm:h-5 ${danger ? 'text-red-400' : 'text-primary'}`} />
       </div>
-      <div>
-        <p className={`font-bold text-sm ${danger ? 'text-red-400' : 'text-white'}`}>{title}</p>
-        <p className="text-xs text-gray-500 mt-0.5">{description}</p>
+      <div className="min-w-0">
+        <p className={`font-bold text-xs sm:text-sm ${danger ? 'text-red-400' : 'text-white'}`}>{title}</p>
+        <p className="text-[10px] sm:text-xs text-gray-500 mt-0.5 truncate">{description}</p>
       </div>
     </div>
-    <div className="flex-shrink-0 ml-4">{children}</div>
+    <div className="flex-shrink-0 ml-2 sm:ml-4">{children}</div>
   </div>
 );
 
@@ -115,9 +115,9 @@ const Settings = () => {
   };
 
   return (
-    <div className="p-8 md:p-16 max-w-3xl mx-auto min-h-screen">
+    <div className="p-4 sm:p-8 md:p-16 max-w-3xl mx-auto min-h-screen">
       <SEO title="Settings" description="Manage your TFC account settings." />
-      <h2 className="text-4xl font-black uppercase tracking-tighter mb-2">Settings</h2>
+      <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tighter mb-2">Settings</h2>
       <p className="text-gray-500 font-bold uppercase text-[10px] tracking-widest mb-12">Manage your preferences</p>
 
       <div className="space-y-3">

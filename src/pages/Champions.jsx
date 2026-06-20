@@ -349,19 +349,19 @@ const Champions = () => {
   );
 
   return (
-    <div className="p-8 md:p-16 max-w-7xl mx-auto min-h-screen">
+    <div className="p-4 sm:p-8 md:p-16 max-w-7xl mx-auto min-h-screen">
       <SEO title="Champions" description="TFC Fighter Rankings and Champion Profiles." />
 
-      <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+      <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-12 gap-4 sm:gap-6">
         <div>
-          <h2 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none mb-4">
+          <h2 className="text-3xl sm:text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none mb-2 sm:mb-4">
             TFC <span className="text-primary italic">Champions</span>
           </h2>
-          <p className="text-gray-500 font-bold uppercase tracking-[0.3em] text-xs">Fighter Rankings & Profiles</p>
+          <p className="text-gray-500 font-bold uppercase tracking-[0.3em] text-[10px] sm:text-xs">Fighter Rankings & Profiles</p>
         </div>
         <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }} onClick={() => setShowModal(true)}
-          className="flex items-center space-x-3 bg-primary hover:bg-red-600 text-black font-black py-4 px-8 rounded-2xl uppercase tracking-widest transition-all shadow-xl shadow-primary/20">
-          <Plus className="w-5 h-5" /><span>Become a Champion</span>
+          className="flex items-center space-x-2 sm:space-x-3 bg-primary hover:bg-red-600 text-black font-black py-3 sm:py-4 px-5 sm:px-8 rounded-2xl uppercase tracking-widest text-sm sm:text-base transition-all shadow-xl shadow-primary/20">
+          <Plus className="w-4 h-4 sm:w-5 sm:h-5" /><span>Become a Champion</span>
         </motion.button>
       </div>
 
@@ -376,7 +376,8 @@ const Champions = () => {
         </div>
       ) : (
         <div className="bg-surface border border-gray-800 rounded-3xl overflow-hidden">
-          <div className="overflow-x-auto">
+          {/* Desktop Table */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-800">
@@ -439,6 +440,43 @@ const Champions = () => {
                 ))}
               </tbody>
             </table>
+          </div>
+
+          {/* Mobile Cards */}
+          <div className="md:hidden divide-y divide-gray-800/50">
+            {sorted.map((c, i) => (
+              <motion.div key={c.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}
+                className="p-4 hover:bg-white/5 transition-colors">
+                <div className="flex items-center space-x-3 mb-3">
+                  <span className={`font-black text-lg w-8 ${i === 0 ? 'text-yellow-400' : i === 1 ? 'text-gray-300' : i === 2 ? 'text-orange-400' : 'text-gray-600'}`}>{i + 1}</span>
+                  {c.images?.profile ? (
+                    <img src={c.images.profile} alt={c.fullName} className="w-12 h-12 rounded-full object-cover border-2 border-gray-700" />
+                  ) : (
+                    <div className="w-12 h-12 rounded-full bg-gray-800 flex items-center justify-center border-2 border-gray-700">
+                      <User className="w-6 h-6 text-gray-600" />
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-black text-sm text-white truncate">{c.fullName}</p>
+                    <p className="text-primary font-bold text-xs italic truncate">"{c.nickname}"</p>
+                    <p className="text-[10px] text-gray-500 uppercase tracking-wider">{c.country}</p>
+                  </div>
+                  <div className="flex items-center space-x-1 text-sm font-black flex-shrink-0">
+                    <span className="text-green-400">{c.record?.wins}W</span>
+                    <span className="text-gray-600">-</span>
+                    <span className="text-red-400">{c.record?.losses}L</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between text-xs text-gray-400 pl-11">
+                  <span>{c.height}m · {c.weight}kg</span>
+                  <span className="truncate ml-2">{c.association}</span>
+                  <div className="flex space-x-2 flex-shrink-0 ml-2">
+                    {c.links?.tapology && <a href={c.links.tapology} target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-primary"><ExternalLink className="w-3.5 h-3.5" /></a>}
+                    {c.links?.instagram && <a href={c.links.instagram} target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-pink-400"><ExternalLink className="w-3.5 h-3.5" /></a>}
+                  </div>
+                </div>
+              </motion.div>
+            ))}
           </div>
         </div>
       )}

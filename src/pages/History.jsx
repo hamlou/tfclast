@@ -24,14 +24,14 @@ const History = () => {
 
 
   return (
-    <div className="p-8 md:p-16 max-w-6xl mx-auto min-h-screen">
+    <div className="p-4 sm:p-8 md:p-16 max-w-6xl mx-auto min-h-screen">
       <SEO 
         title="Watch History" 
         description="Resume watching where you left off. Manage your TFC watch history." 
       />
-      <div className="flex items-center justify-between mb-12">
+      <div className="flex items-center justify-between mb-8 sm:mb-12">
         <div>
-          <h2 className="text-4xl font-black uppercase tracking-tighter mb-2">Watch History</h2>
+          <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tighter mb-2">Watch History</h2>
           <p className="text-gray-500 font-bold uppercase text-[10px] tracking-widest flex items-center">
             <Clock className="w-3 h-3 mr-1" /> Last 30 days
           </p>
@@ -49,7 +49,7 @@ const History = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
-              className="group flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-8 p-6 bg-surface border border-gray-800 rounded-3xl hover:border-primary transition-all cursor-pointer relative overflow-hidden"
+              className="group flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-6 lg:space-x-8 p-4 sm:p-6 bg-surface border border-gray-800 rounded-2xl sm:rounded-3xl hover:border-primary transition-all cursor-pointer relative overflow-hidden"
               onClick={() => handlePlay(item)}
 
             >

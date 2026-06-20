@@ -50,7 +50,7 @@ const Profile = () => {
   };
 
   return (
-    <div className="p-8 md:p-16 max-w-5xl mx-auto min-h-screen">
+    <div className="p-4 sm:p-8 md:p-16 max-w-5xl mx-auto min-h-screen">
       <SEO title="My Profile" description="Manage your TFC account." />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
@@ -144,12 +144,12 @@ const Profile = () => {
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-gradient-to-r from-primary to-red-800 rounded-3xl p-8 text-black shadow-xl shadow-primary/20"
+              className="bg-gradient-to-r from-primary to-red-800 rounded-2xl sm:rounded-3xl p-5 sm:p-8 text-black shadow-xl shadow-primary/20"
             >
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap gap-4">
                 <div>
                   <p className="text-xs font-black uppercase tracking-widest opacity-70 mb-1">Active Membership</p>
-                  <h3 className="text-3xl font-black uppercase tracking-tighter">{user.plan || 'Elite Pro'}</h3>
+                  <h3 className="text-2xl sm:text-3xl font-black uppercase tracking-tighter">{user.plan || 'Elite Pro'}</h3>
                   {user.currentPeriodEnd && (
                     <p className="font-bold opacity-80 mt-1 text-sm">
                       Renews {new Date(user.currentPeriodEnd).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
@@ -164,7 +164,7 @@ const Profile = () => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               onClick={() => navigate('/subscription')}
-              className="cursor-pointer bg-gradient-to-r from-gray-900 to-gray-800 rounded-3xl p-8 border border-primary/30 hover:border-primary/60 transition-all group shadow-xl"
+              className="cursor-pointer bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl sm:rounded-3xl p-5 sm:p-8 border border-primary/30 hover:border-primary/60 transition-all group shadow-xl"
             >
               <div className="flex items-center justify-between">
                 <div>

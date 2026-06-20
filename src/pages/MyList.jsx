@@ -25,9 +25,9 @@ const MyList = () => {
   const isSubscribed = hasActiveSubscription();
 
   return (
-    <div className="p-8 md:p-16 max-w-6xl mx-auto min-h-screen">
+    <div className="p-4 sm:p-8 md:p-16 max-w-6xl mx-auto min-h-screen">
       <SEO title="My List" description="Your personal TFC collection." />
-      <h2 className="text-4xl font-black uppercase tracking-tighter mb-12">My List</h2>
+      <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tighter mb-8 sm:mb-12">My List</h2>
 
       {/* Subscription promo banner for non-subscribers */}
       {!isSubscribed && (
@@ -57,7 +57,7 @@ const MyList = () => {
           <p className="text-gray-500 text-sm">Add videos by clicking the + button on any content card.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
           {myList.map((item, i) => (
             <motion.div
               key={item.id}

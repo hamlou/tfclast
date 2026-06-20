@@ -141,7 +141,7 @@ const Subscription = () => {
   const cryptoExpired = cryptoSub?.reason === 'expired';
 
   return (
-    <div className="p-8 md:p-16 max-w-7xl mx-auto min-h-screen">
+    <div className="p-4 sm:p-8 md:p-16 max-w-7xl mx-auto min-h-screen">
       <SEO
         title="Subscription Plans"
         description="Choose the perfect TFC membership plan to unlock 4K HDR streaming and exclusive live events."
@@ -172,9 +172,9 @@ const Subscription = () => {
         )}
       </AnimatePresence>
 
-      <div className="text-center mb-16">
-        <h2 className="text-5xl font-black uppercase tracking-tighter mb-4">Choose Your Plan</h2>
-        <p className="text-gray-500 font-bold uppercase tracking-widest text-sm mb-3">Unlock the full TFC experience</p>
+      <div className="text-center mb-10 sm:mb-16">
+        <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tighter mb-3 sm:mb-4">Choose Your Plan</h2>
+        <p className="text-gray-500 font-bold uppercase tracking-widest text-xs sm:text-sm mb-3">Unlock the full TFC experience</p>
         <p className="text-gray-600 text-xs max-w-xl mx-auto leading-relaxed">
           All plans include <span className="text-white font-bold">identical access</span> to every Pro video on the platform.
           The only difference between plans is the <span className="text-primary font-bold">subscription duration</span>.
@@ -182,12 +182,12 @@ const Subscription = () => {
       </div>
 
       {/* ── Stripe Plans (existing) ── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-4xl mx-auto">
         {mockSubscriptionPlans.map((plan) => (
           <motion.div
             key={plan.id}
             whileHover={{ y: -10 }}
-            className={`relative bg-surface p-8 rounded-[2.5rem] border-2 transition-all ${user?.plan === plan.name ? 'border-primary shadow-2xl shadow-primary/20' : 'border-gray-800'}`}
+            className={`relative bg-surface p-5 sm:p-8 rounded-[2.5rem] border-2 transition-all ${user?.plan === plan.name ? 'border-primary shadow-2xl shadow-primary/20' : 'border-gray-800'}`}
           >
             {user?.plan === plan.name && (
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-black px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
@@ -293,12 +293,12 @@ const Subscription = () => {
         {/* Crypto Plan Cards — show buy buttons if NOT active */}
         {(!hasCryptoActive || cryptoExpired) && (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-4xl mx-auto">
               {cryptoPlans.map((plan) => (
                 <motion.div
                   key={plan.key}
                   whileHover={{ y: -8 }}
-                  className="relative bg-surface p-8 rounded-[2.5rem] border-2 border-gray-800 hover:border-emerald-500/50 transition-all"
+                  className="relative bg-surface p-5 sm:p-8 rounded-[2.5rem] border-2 border-gray-800 hover:border-emerald-500/50 transition-all"
                 >
                   <div className={`absolute -top-4 right-4 ${plan.badgeColor || 'bg-red-500'} text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest`}>
                     {plan.badge}
@@ -368,7 +368,7 @@ const Subscription = () => {
       </div>
 
       {/* Trust Badges */}
-      <div className="mt-20 flex flex-wrap justify-center gap-12 opacity-50">
+      <div className="mt-12 sm:mt-20 flex flex-wrap justify-center gap-6 sm:gap-12 opacity-50">
         <div className="flex items-center space-x-2">
           <Shield className="w-5 h-5" />
           <span className="text-[10px] font-black uppercase tracking-widest">Secure Payments</span>
