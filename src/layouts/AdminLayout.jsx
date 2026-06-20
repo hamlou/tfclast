@@ -2,14 +2,13 @@ import React from 'react';
 import { Outlet, Navigate } from 'react-router-dom';
 import AdminSidebar from '../components/AdminSidebar';
 import { useUser } from '../context/UserContext';
-
-const ADMIN_EMAIL = 'benbrayekhamza1@gmail.com';
+import { isAdminEmail } from '../config/admin';
 
 const AdminLayout = () => {
   const { user } = useUser();
 
   // Double-lock: check both role AND exact email — localStorage tampering won't work
-  const isAdmin = user?.role === 'admin' && user?.email === ADMIN_EMAIL;
+  const isAdmin = user?.role === 'admin' && isAdminEmail(user?.email);
   if (!isAdmin) {
     return <Navigate to="/" replace />;
   }

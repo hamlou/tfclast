@@ -2,9 +2,8 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { auth, db } from '../firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, onSnapshot } from 'firebase/firestore';
+import { isAdminEmail } from '../config/admin';
 
-
-const ADMIN_EMAIL = 'benbrayekhamza1@gmail.com';
 
 const UserContext = createContext();
 
@@ -63,7 +62,7 @@ export const UserProvider = ({ children }) => {
               if (!prev) return prev;
               const updated = {
                 ...prev,
-                role: firebaseUser.email === ADMIN_EMAIL ? 'admin' : 'user',
+                role: isAdminEmail(firebaseUser.email) ? 'admin' : 'user',
                 type: subscriptionActive ? 'Premium' : 'Free',
                 plan: subscriptionActive ? (firestoreData.subscriptionPlan || 'Elite Pro') : 'Basic',
                 subscriptionStatus: firestoreData.subscriptionStatus || 'none',
@@ -110,7 +109,7 @@ export const UserProvider = ({ children }) => {
       avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${username || email.split('@')[0]}&backgroundType=gradientLinear&backgroundColor=b91c1c,7f1d1d`,
       type: 'Free',
       plan: 'Basic',
-      role: email === ADMIN_EMAIL ? 'admin' : 'user',
+      role: isAdminEmail(email) ? 'admin' : 'user',
       joinedDate: new Date().toISOString(),
       sessionExpiry: Date.now() + sessionDuration,
       subscriptionStatus: 'none',

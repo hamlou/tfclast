@@ -92,29 +92,6 @@ const videosToAdd = [
     duration: '',
     order: 1,
   },
-  {
-    title: 'TFC 79 The War — Full Event',
-    videoUrl: 'https://www.youtube.com/watch?v=ScMzIvxBSi4',
-    thumbnail: 'https://tfc-event.com/wp-content/uploads/2024/08/0079-THE.png',
-    description: 'Full event coverage of TFC 79 The War',
-    category: 'PRO Exclusive',
-    type: 'pro',
-    isPremium: true,
-    duration: '',
-    order: 2,
-  },
-  // Top Picks
-  {
-    title: 'TFC Titans Fight — Full Event',
-    videoUrl: 'https://www.youtube.com/watch?v=ScMzIvxBSi4',
-    thumbnail: 'https://tfc-event.com/wp-content/uploads/2024/08/Titan-Fight-scaled.jpg',
-    description: 'Full event coverage of TFC Titans Fight',
-    category: 'Top Picks',
-    type: 'pro',
-    isPremium: true,
-    duration: '',
-    order: 1,
-  },
 ];
 
 async function addMissingVideos() {
@@ -158,6 +135,8 @@ async function addMissingVideos() {
 
       const icon = video.isPremium ? '🔒' : '✅';
       console.log(`${icon} ADDED: ${video.title} (${video.category})`);
+      existingTitles.add(video.title);
+      existingUrls.add(video.videoUrl);
       addedCount++;
     }
 

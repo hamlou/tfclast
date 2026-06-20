@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Twitter, Instagram, Github, Mail } from 'lucide-react';
 
 const Footer = () => {
   return (
@@ -11,13 +10,6 @@ const Footer = () => {
           <p className="text-gray-500 max-w-sm mb-8 leading-relaxed">
             The world's premier destination for high-stakes competition, exclusive entertainment, and global live events. Redefining the future of content, one stream at a time.
           </p>
-          <div className="flex space-x-6">
-            {[Twitter, Instagram, Github, Mail].map((Icon, i) => (
-              <a key={i} href="#" className="text-gray-600 hover:text-primary transition-colors">
-                <Icon className="w-5 h-5" />
-              </a>
-            ))}
-          </div>
         </div>
 
         <div>
@@ -51,6 +43,13 @@ const Footer = () => {
           © 2026 TFC NETWORK. ALL RIGHTS RESERVED.
         </p>
         <div className="flex items-center space-x-6">
+          <div className="flex items-center space-x-2 text-gray-600 text-[10px] font-black uppercase tracking-widest">
+            <span className="relative block w-6 h-4 overflow-hidden rounded-[2px] shadow-sm">
+              <span className="absolute inset-0 bg-[repeating-linear-gradient(to_bottom,#b22234_0,#b22234_7.69%,#fff_7.69%,#fff_15.38%)]" />
+              <span className="absolute left-0 top-0 w-[46%] h-[54%] bg-[#3c3b6e]" />
+            </span>
+            <span>United States</span>
+          </div>
           <Link to="/privacy-policy" className="text-gray-600 text-[10px] font-bold uppercase tracking-widest hover:text-primary transition-colors">Privacy</Link>
           <Link to="/terms" className="text-gray-600 text-[10px] font-bold uppercase tracking-widest hover:text-primary transition-colors">Terms</Link>
           <div className="flex items-center space-x-2">

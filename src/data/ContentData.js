@@ -14,7 +14,8 @@ export const TFC_INFO = {
   stateOfFormation: 'Wyoming',
   address: '15442 Ventura Blvd, Suite 201-2304, Sherman Oaks, CA 91403, United States',
   email: 'contact@tfc.events',
-  phone: '+216 98 241 649',
+  phone: '+1 (863) 331-3781',
+  phoneHref: '+18633313781',
   facebook: 'https://www.facebook.com/tfc.event1',
   instagram: 'https://www.instagram.com/tfc_events/',
   youtube: 'https://www.youtube.com/@TFC.events',
@@ -185,28 +186,12 @@ export const CATEGORIES = [
         thumbnail: 'https://tfc-event.com/wp-content/uploads/2024/08/WhatsApp-Image-2024-08-13-a-21.27.25_f7cede16.jpg',
         videoUrl: 'https://www.youtube.com/watch?v=ScMzIvxBSi4',
       },
-      {
-        id: 'v11',
-        title: 'TFC 79 The War — Full Event',
-        duration: '',
-        isPremium: true,
-        thumbnail: 'https://tfc-event.com/wp-content/uploads/2024/08/0079-THE.png',
-        videoUrl: 'https://www.youtube.com/watch?v=ScMzIvxBSi4',
-      },
     ],
   },
   {
     id: 'c4',
     title: 'Top Picks',
     items: [
-      {
-        id: 'v14',
-        title: 'TFC Titans Fight — Full Event',
-        duration: '',
-        isPremium: true,
-        thumbnail: 'https://tfc-event.com/wp-content/uploads/2024/08/Titan-Fight-scaled.jpg',
-        videoUrl: 'https://www.youtube.com/watch?v=ScMzIvxBSi4',
-      },
     ],
   },
 ];

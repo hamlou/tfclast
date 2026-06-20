@@ -5,7 +5,15 @@ import { getAuthToken } from '../../utils/authHelpers';
 
 const BACKEND = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 
-const EMPTY_FORM = { title: '', videoUrl: '', thumbnail: '', category: '', type: 'free' };
+const EMPTY_FORM = {
+  title: '',
+  videoUrl: '',
+  thumbnail: '',
+  category: '',
+  duration: '',
+  description: '',
+  type: 'free',
+};
 
 // Helper: Extract YouTube video ID from URL
 const extractYouTubeId = (url) => {
@@ -114,6 +122,8 @@ const VideosManager = () => {
       videoUrl: video.videoUrl || '',
       thumbnail: video.thumbnail || '',
       category: video.category || '',
+      duration: video.duration || '',
+      description: video.description || '',
       type: video.type || (video.isPremium ? 'pro' : 'free'),
     });
     setIsModalOpen(true);
@@ -181,18 +191,18 @@ const VideosManager = () => {
     setActionLoading(false);
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this video? This cannot be undone.')) return;
+  const handleDelete = async (video) => {
+    if (!window.confirm(`Delete "${video.title}" permanently?\n\nThis removes the entire video from the library and cannot be undone.`)) return;
     setActionLoading(true);
     try {
       const token = await getAuthToken();
-      const res = await fetch(`${BACKEND}/api/admin/videos/${id}`, {
+      const res = await fetch(`${BACKEND}/api/admin/videos/${video.id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
         showToast('Video deleted successfully');
-        setVideos(prev => prev.filter(v => v.id !== id));
+        setVideos(prev => prev.filter(v => v.id !== video.id));
       } else {
         const data = await res.json();
         showToast(data.error || 'Delete failed', 'error');
@@ -295,6 +305,23 @@ const VideosManager = () => {
                       <div className="min-w-0">
                         <p className="font-black text-white group-hover:text-primary transition-colors truncate">{video.title}</p>
                         <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-1 truncate">ID: {video.id.slice(0, 8)}...</p>
+                        <div className="flex flex-wrap gap-2 mt-3">
+                          <button
+                            onClick={() => openEditModal(video)}
+                            className="inline-flex items-center gap-1.5 px-3 py-2 bg-white/5 hover:bg-white/10 border border-gray-800 rounded-lg text-gray-300 hover:text-white transition-all text-[10px] font-black uppercase tracking-widest"
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                            <span>Edit Video</span>
+                          </button>
+                          <button
+                            onClick={() => handleDelete(video)}
+                            disabled={actionLoading}
+                            className="inline-flex items-center gap-1.5 px-3 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/50 rounded-lg text-red-400 hover:text-red-300 transition-all disabled:opacity-40 text-[10px] font-black uppercase tracking-widest"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>Delete Video</span>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </td>
@@ -311,19 +338,21 @@ const VideosManager = () => {
                   <td className="px-8 py-6 text-xs font-medium text-gray-400">{video.category || '—'}</td>
                   <td className="px-8 py-6 text-xs font-medium text-gray-400">{video.duration || '—'}</td>
                   <td className="px-8 py-6">
-                    <div className="flex justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex justify-end gap-2">
                       <button
                         onClick={() => openEditModal(video)}
-                        className="p-3 bg-white/5 hover:bg-white/10 rounded-xl text-gray-400 hover:text-white transition-all"
+                        className="inline-flex items-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 border border-gray-800 rounded-xl text-gray-300 hover:text-white transition-all text-[10px] font-black uppercase tracking-widest"
                       >
                         <Edit2 className="w-4 h-4" />
+                        <span>Edit</span>
                       </button>
                       <button
-                        onClick={() => handleDelete(video.id)}
+                        onClick={() => handleDelete(video)}
                         disabled={actionLoading}
-                        className="p-3 bg-white/5 hover:bg-red-500/20 rounded-xl text-gray-400 hover:text-red-500 transition-all disabled:opacity-40"
+                        className="inline-flex items-center gap-2 px-3 py-2 bg-white/5 hover:bg-red-500/20 border border-gray-800 hover:border-red-500/50 rounded-xl text-gray-300 hover:text-red-500 transition-all disabled:opacity-40 text-[10px] font-black uppercase tracking-widest"
                       >
                         <Trash2 className="w-4 h-4" />
+                        <span>Delete</span>
                       </button>
                     </div>
                   </td>
@@ -386,6 +415,41 @@ const VideosManager = () => {
                       value={formData.title}
                       onChange={e => setFormData({ ...formData, title: e.target.value })}
                       placeholder="Auto-filled from YouTube (you can edit)"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Thumbnail URL</label>
+                      <input
+                        type="url"
+                        className="w-full bg-black/40 border border-gray-800 rounded-2xl px-6 py-4 font-bold focus:border-primary transition-all text-white"
+                        value={formData.thumbnail}
+                        onChange={e => setFormData({ ...formData, thumbnail: e.target.value })}
+                        placeholder="https://..."
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Duration</label>
+                      <input
+                        type="text"
+                        className="w-full bg-black/40 border border-gray-800 rounded-2xl px-6 py-4 font-bold focus:border-primary transition-all text-white"
+                        value={formData.duration}
+                        onChange={e => setFormData({ ...formData, duration: e.target.value })}
+                        placeholder="12:34 or 1h 20m"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Description</label>
+                    <textarea
+                      rows="3"
+                      className="w-full bg-black/40 border border-gray-800 rounded-2xl px-6 py-4 font-bold focus:border-primary transition-all text-white resize-none"
+                      value={formData.description}
+                      onChange={e => setFormData({ ...formData, description: e.target.value })}
+                      placeholder="Optional video description"
                     />
                   </div>
 

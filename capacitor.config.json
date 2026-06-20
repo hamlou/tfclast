@@ -1,0 +1,24 @@
+{
+  "appId": "com.tfc.events",
+  "appName": "TFC Events",
+  "webDir": "dist",
+  "server": {
+    "url": "https://tfc.events",
+    "cleartext": false
+  },
+  "android": {
+    "allowMixedContent": false,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": false
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 3000,
+      "launchAutoHide": true,
+      "backgroundColor": "#000000",
+      "androidSplashResourceName": "splash",
+      "showSpinner": true,
+      "spinnerColor": "#ffffff"
+    }
+  }
+}

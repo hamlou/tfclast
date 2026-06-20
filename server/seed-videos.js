@@ -66,29 +66,33 @@ const proVideos = [
 
 async function seedVideos() {
   console.log('🌱 Seeding Firestore with test videos...\n');
+  const seenYoutubeIds = new Set();
 
-  // Add free videos
-  for (const video of freeVideos) {
+  const addVideo = async (video, type) => {
+    if (seenYoutubeIds.has(video.youtubeId)) {
+      console.log(`SKIPPED duplicate YouTube video: ${video.title}`);
+      return;
+    }
+
+    seenYoutubeIds.add(video.youtubeId);
     await db.collection('videos').add({
       ...video,
-      type: 'free',
-      isPremium: false,
+      type,
+      isPremium: type === 'pro',
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
       updatedAt: admin.firestore.FieldValue.serverTimestamp()
     });
-    console.log(`✅ FREE video added: ${video.title}`);
+    console.log(`${type === 'pro' ? 'PRO' : 'FREE'} video added: ${video.title}`);
+  };
+
+  // Add free videos
+  for (const video of freeVideos) {
+    await addVideo(video, 'free');
   }
 
   // Add pro videos
   for (const video of proVideos) {
-    await db.collection('videos').add({
-      ...video,
-      type: 'pro',
-      isPremium: true,
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
-      updatedAt: admin.firestore.FieldValue.serverTimestamp()
-    });
-    console.log(`🔒 PRO video added: ${video.title}`);
+    await addVideo(video, 'pro');
   }
 
   console.log('\n✅ Done! Firestore is ready.');

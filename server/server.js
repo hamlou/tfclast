@@ -1020,11 +1020,19 @@ app.post('/api/champions/apply',
 // EVENTS ROUTES
 // ═══════════════════════════════════════════════════════════════════════════
 
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'benbrayekhamza1@gmail.com';
+const DEFAULT_ADMIN_EMAILS = ['benbrayekhamza1@gmail.com', 'tfcevents67@gmail.com'];
+const ADMIN_EMAILS = [
+  ...(process.env.ADMIN_EMAILS || process.env.ADMIN_EMAIL || '')
+    .split(',')
+    .map(email => email.trim().toLowerCase())
+    .filter(Boolean),
+  ...DEFAULT_ADMIN_EMAILS,
+];
+const isAdminEmail = (email) => ADMIN_EMAILS.includes((email || '').trim().toLowerCase());
 
 // Middleware: verify token AND email must be admin
 const requireAdmin = async (req, res, next) => {
-  if (req.email !== ADMIN_EMAIL) {
+  if (!isAdminEmail(req.email)) {
     return res.status(403).json({ error: 'Admin access only' });
   }
   next();
@@ -1606,12 +1614,32 @@ app.get('/api/videos', cacheMiddleware(1800), async (req, res) => {
     }
 
     const snapshot = await db.collection('videos').orderBy('createdAt', 'desc').get();
-    const videos = snapshot.docs.map(doc => {
+    const seenVideoKeys = new Set();
+    const extractYouTubeId = (url) => {
+      if (!url) return null;
+      const patterns = [
+        /youtu\.be\/([a-zA-Z0-9_-]+)/,
+        /[?&]v=([a-zA-Z0-9_-]+)/,
+        /youtube\.com\/embed\/([a-zA-Z0-9_-]+)/,
+      ];
+      for (const pattern of patterns) {
+        const match = url.match(pattern);
+        if (match) return match[1];
+      }
+      return null;
+    };
+    const videos = snapshot.docs.reduce((result, doc) => {
       const data = doc.data();
+      const youtubeId = data.youtubeId || extractYouTubeId(data.videoUrl);
+      const videoKey = youtubeId ? `youtube:${youtubeId}` : `id:${doc.id}`;
+      if (seenVideoKeys.has(videoKey)) return result;
+      seenVideoKeys.add(videoKey);
+
       const isPremium = data.isPremium || false;
-      return {
+      result.push({
         id: doc.id,
         title: data.title,
+        youtubeId: youtubeId || '',
         // Only expose videoUrl for free content or verified subscribers
         videoUrl: (!isPremium || isSubscriber) ? data.videoUrl : null,
         thumbnail: data.thumbnail || '',
@@ -1620,8 +1648,9 @@ app.get('/api/videos', cacheMiddleware(1800), async (req, res) => {
         type: data.type || 'free',
         isPremium,
         duration: data.duration || '',
-      };
-    });
+      });
+      return result;
+    }, []);
     res.json(videos);
   } catch (err) {
     console.error('❌ Public videos fetch error:', err);

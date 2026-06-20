@@ -9,14 +9,15 @@ import VideoPlayer from '../components/VideoPlayer';
 import { useUser } from '../context/UserContext';
 import { AnimatePresence } from 'framer-motion';
 import { auth } from '../firebase';
+import { getVideoDeduplicationKey } from '../utils/video';
 
 const BACKEND = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 
 const Browse = () => {
-  const hardcodedItems = CATEGORIES.flatMap(c => c.items);
   const [firestoreVideos, setFirestoreVideos] = useState([]);
   const [videosLoading, setVideosLoading] = useState(true);
   const [videosError, setVideosError] = useState(false);
+  const hardcodedItems = videosError ? CATEGORIES.flatMap(c => c.items) : [];
   const [activeVideo, setActiveVideo] = useState(null);
   const location = useLocation();
   const [searchQuery, setSearchQuery] = useState(location.state?.searchQuery || '');
@@ -44,6 +45,8 @@ const Browse = () => {
         if (res.ok) {
           const data = await res.json();
           if (Array.isArray(data)) setFirestoreVideos(data);
+        } else {
+          setVideosError(true);
         }
       } catch {
         setVideosError(true);
@@ -54,22 +57,21 @@ const Browse = () => {
     fetchVideos();
   }, []);
 
-  // Merge: Firestore videos first, then hardcoded ones (deduplicate by id)
+  // Merge: Firestore videos first, then hardcoded ones. Deduplicate by YouTube ID first.
   const mergedItems = (() => {
-    const idSet = new Set();
+    const seen = new Set();
     const result = [];
-    // Firestore videos take priority
-    for (const v of firestoreVideos) {
-      if (v.id) idSet.add(v.id);
+
+    const addVideo = (v) => {
+      const key = getVideoDeduplicationKey(v);
+      if (key && seen.has(key)) return;
+      if (key) seen.add(key);
       result.push(v);
-    }
-    // Then hardcoded videos
-    for (const v of hardcodedItems) {
-      if (!v.id || !idSet.has(v.id)) {
-        if (v.id) idSet.add(v.id);
-        result.push(v);
-      }
-    }
+    };
+
+    for (const v of firestoreVideos) addVideo(v);
+    for (const v of hardcodedItems) addVideo(v);
+
     return result;
   })();
 

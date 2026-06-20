@@ -10,6 +10,7 @@ import UpgradeModal from '../components/UpgradeModal';
 import Navbar from '../components/Navbar';
 import { MapPin, Mail, Phone, Facebook, Instagram, Youtube, Send, Loader2, CheckCircle2, Trophy, Users, Calendar, ArrowRight } from 'lucide-react';
 import { auth } from '../firebase';
+import { extractYouTubeId, getVideoDeduplicationKey } from '../utils/video';
 
 const FALLBACK_EVENTS = [
   { id: 'e3', name: 'The Raiders', number: 80, date: '2024-01-13', location: 'Sfax, Tunisia', status: 'past', url: 'https://tfc-event.com/tfc-raiders/', image: 'https://tfc-event.com/wp-content/uploads/2024/08/WhatsApp-Image-2024-08-13-a-21.27.07_f68082cc.jpg' },
@@ -28,23 +29,25 @@ const Home = () => {
   const [activeVideo, setActiveVideo] = useState(null);
   const { user, addToHistory, hasActiveSubscription } = useUser();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  const hardcodedItems = CATEGORIES.flatMap(c => c.items);
   const [firestoreVideos, setFirestoreVideos] = useState([]);
+  const [videosError, setVideosError] = useState(false);
+  const hardcodedItems = videosError ? CATEGORIES.flatMap(c => c.items) : [];
 
-  // Merge Firestore + hardcoded videos (deduplicate by id) and interleave free/pro
+  // Merge Firestore + hardcoded videos and deduplicate by YouTube ID first.
   const allItems = (() => {
-    const idSet = new Set();
+    const seen = new Set();
     const freeVideos = [];
     const proVideos = [];
     
     const addVideo = (v) => {
-      if (!v.id || !idSet.has(v.id)) { 
-        if (v.id) idSet.add(v.id);
-        if (v.isPremium || v.type === 'pro') {
-          proVideos.push(v);
-        } else {
-          freeVideos.push(v);
-        }
+      const key = getVideoDeduplicationKey(v);
+      if (key && seen.has(key)) return;
+      if (key) seen.add(key);
+
+      if (v.isPremium || v.type === 'pro') {
+        proVideos.push(v);
+      } else {
+        freeVideos.push(v);
       }
     };
 
@@ -64,6 +67,13 @@ const Home = () => {
   // ── TRENDING VIDEOS: Prioritize attractive fighting thumbnails from API ──
   const trendingVideos = (() => {
     const videos = [];
+    const seen = new Set();
+    const addTrendingVideo = (v) => {
+      const key = getVideoDeduplicationKey(v);
+      if (key && seen.has(key)) return;
+      if (key) seen.add(key);
+      videos.push(v);
+    };
     
     // First, look for actual fighting videos from the API (avoid generic "TFC Event" titles)
     for (const v of firestoreVideos) {
@@ -77,7 +87,7 @@ const Home = () => {
       const isProfessional = !isGeneric && !containsBudo && !containsEmoji;
       
       if (isProfessional && v.thumbnail && v.thumbnail.includes('maxresdefault')) {
-        if (!videos.some(vid => vid.id === v.id)) videos.push(v);
+        addTrendingVideo(v);
       }
     }
     
@@ -85,16 +95,14 @@ const Home = () => {
     for (const v of firestoreVideos) {
       if (videos.length >= 8) break;
       if (v.thumbnail && v.thumbnail.includes('maxresdefault')) {
-        if (!videos.some(vid => vid.id === v.id)) videos.push(v);
+        addTrendingVideo(v);
       }
     }
     
     // Fallback to hardcoded items if we don't have 8 yet
     for (const v of hardcodedItems) {
       if (videos.length >= 8) break;
-      if (!videos.some(vid => vid.id === v.id)) {
-        videos.push(v);
-      }
+      addTrendingVideo(v);
     }
     
     return videos;
@@ -117,8 +125,13 @@ const Home = () => {
         if (res.ok) {
           const data = await res.json();
           if (Array.isArray(data)) setFirestoreVideos(data);
+          setVideosError(false);
+        } else {
+          setVideosError(true);
         }
-      } catch {}
+      } catch {
+        setVideosError(true);
+      }
     };
     fetchVideos();
 
@@ -146,10 +159,8 @@ const Home = () => {
 
   const normalizeYouTubeUrl = (url) => {
     if (!url) return url;
-    const shortMatch = url.match(/youtu\.be\/([a-zA-Z0-9_-]+)/);
-    if (shortMatch) return `https://www.youtube.com/watch?v=${shortMatch[1]}`;
-    const watchMatch = url.match(/youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/);
-    if (watchMatch) return `https://www.youtube.com/watch?v=${watchMatch[1]}`;
+    const youtubeId = extractYouTubeId(url);
+    if (youtubeId) return `https://www.youtube.com/watch?v=${youtubeId}`;
     return url;
   };
 
@@ -368,7 +379,7 @@ const Home = () => {
               <h3 className="text-white text-xl font-black uppercase tracking-tight">Get In Touch</h3>
               {[
                 { icon: Mail,  text: TFC_INFO.email, href: `mailto:${TFC_INFO.email}` },
-                { icon: Phone, text: TFC_INFO.phone,  href: `tel:${TFC_INFO.phone}` },
+                { icon: Phone, text: TFC_INFO.phone,  href: `tel:${TFC_INFO.phoneHref || TFC_INFO.phone}` },
                 { icon: MapPin, text: `${TFC_INFO.location}, ${TFC_INFO.country}`, href: `https://maps.google.com/?q=${encodeURIComponent(TFC_INFO.address)}` },
               ].map(({ icon: Icon, text, href }) => (
                 <a key={text} href={href} target="_blank" rel="noopener noreferrer" className="flex items-center space-x-4 group">
