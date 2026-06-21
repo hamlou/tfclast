@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { auth, db } from '../firebase';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { isAdminEmail } from '../config/admin';
 
@@ -46,6 +46,22 @@ export const UserProvider = ({ children }) => {
       }
 
       if (firebaseUser) {
+        // Periodically reload the user if they are not verified yet
+        let reloadInterval;
+        if (!firebaseUser.emailVerified) {
+          reloadInterval = setInterval(async () => {
+            try {
+              await firebaseUser.reload();
+              if (firebaseUser.emailVerified) {
+                clearInterval(reloadInterval);
+                setUser(prev => prev ? { ...prev, emailVerified: true } : prev);
+              }
+            } catch (err) {
+              console.error('Failed to reload user:', err);
+            }
+          }, 3000);
+        }
+
         // Real-time listener on Firestore user document for subscription status
         const userDocRef = doc(db, 'users', firebaseUser.uid);
         unsubscribeFirestore = onSnapshot(userDocRef, (snapshot) => {
@@ -62,19 +78,25 @@ export const UserProvider = ({ children }) => {
               if (!prev) return prev;
               const updated = {
                 ...prev,
-                role: isAdminEmail(firebaseUser.email) ? 'admin' : 'user',
+                role: firestoreData.role || (isAdminEmail(firebaseUser.email) ? 'admin' : 'user'),
                 type: subscriptionActive ? 'Premium' : 'Free',
                 plan: subscriptionActive ? (firestoreData.subscriptionPlan || 'Elite Pro') : 'Basic',
                 subscriptionStatus: firestoreData.subscriptionStatus || 'none',
                 subscriptionPlan: firestoreData.subscriptionPlan || null,
                 currentPeriodEnd: firestoreData.currentPeriodEnd?.toDate()?.toISOString() || null,
                 stripeCustomerId: firestoreData.stripeCustomerId || null,
+                emailVerified: firebaseUser.emailVerified,
               };
               localStorage.setItem('tfc_user', JSON.stringify(updated));
               return updated;
             });
           }
         });
+        
+        // Return a cleanup function for the interval
+        return () => {
+          if (reloadInterval) clearInterval(reloadInterval);
+        };
       }
     });
 
@@ -123,6 +145,15 @@ export const UserProvider = ({ children }) => {
     setWatchHistory([]);
     setMyList([]);
     localStorage.removeItem('tfc_user');
+    localStorage.removeItem('tfc_history');
+    localStorage.removeItem('tfc_list');
+    
+    // Attempt to sign out of Firebase (ignore errors if not logged in)
+    try {
+      signOut(auth);
+    } catch (e) {
+      console.warn('Firebase logout failed', e);
+    }
   };
 
   const updateProfile = (newData) => {

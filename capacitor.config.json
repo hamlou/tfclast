@@ -2,16 +2,17 @@
   "appId": "com.tfc.events",
   "appName": "TFC Events",
   "webDir": "dist",
-  "server": {
-    "url": "https://tfc.events",
-    "cleartext": false
-  },
   "android": {
     "allowMixedContent": false,
     "captureInput": true,
     "webContentsDebuggingEnabled": false
   },
   "plugins": {
+    "GoogleAuth": {
+      "scopes": ["profile", "email"],
+      "serverClientId": "273530712994-daljg27vvg7qof6veptjje95pfdke3g7.apps.googleusercontent.com",
+      "forceCodeForRefreshToken": true
+    },
     "SplashScreen": {
       "launchShowDuration": 3000,
       "launchAutoHide": true,

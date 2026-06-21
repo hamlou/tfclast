@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Zap, Shield, Crown, Loader2, AlertTriangle } from 'lucide-react';
 import PaymentModal from '../components/PaymentModal';
 import { auth } from '../firebase';
+import { Capacitor } from '@capacitor/core';
 import SEO from '../components/SEO';
 
 const Subscription = () => {
@@ -91,7 +92,14 @@ const Subscription = () => {
         return;
       }
 
-      window.location.href = data.payment_url;
+      // Open payment URL: native browser on app, redirect on web
+      if (Capacitor.isNativePlatform()) {
+        const { Browser } = await import('@capacitor/browser');
+        await Browser.open({ url: data.payment_url });
+        setCryptoLoading(null);
+      } else {
+        window.location.href = data.payment_url;
+      }
     } catch (err) {
       console.error('Crypto payment error:', err);
       setCryptoError('Connection error. Make sure the server is running.');

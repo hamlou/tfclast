@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShieldCheck, X, Loader2, Crown } from 'lucide-react';
 import { auth } from '../firebase';
+import { Capacitor } from '@capacitor/core';
 
 const BACKEND = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 
@@ -55,7 +56,15 @@ const PaymentModal = ({ isOpen, onClose, plan }) => {
         return;
       }
 
-      window.location.href = data.url;
+      // Open payment URL: native browser on app, redirect on web
+      if (Capacitor.isNativePlatform()) {
+        const { Browser } = await import('@capacitor/browser');
+        await Browser.open({ url: data.url });
+        setLoading(false);
+        onClose();
+      } else {
+        window.location.href = data.url;
+      }
 
     } catch (err) {
       console.error('Checkout error:', err);

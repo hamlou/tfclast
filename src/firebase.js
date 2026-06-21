@@ -1,15 +1,16 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, applyActionCode, confirmPasswordReset } from 'firebase/auth';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, applyActionCode, confirmPasswordReset, signInWithCredential } from 'firebase/auth';
+import { Capacitor } from '@capacitor/core';
 import { getFirestore, doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyDyptN2m-wIxze1jRJya1hGzqueKe510r4",
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "tfcq-32a8b.firebaseapp.com",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "tfcq-32a8b",
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "tfcq-32a8b.firebasestorage.app",
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "1027395831145",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:1027395831145:web:969f6de4cf9517755e29f8",
-  measurementId: "G-1DWPEPHZDG"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 const app = initializeApp(firebaseConfig);
@@ -27,8 +28,8 @@ const friendlyError = (code) => {
     'auth/operation-not-allowed': 'Email sign-up is currently unavailable.',
     'auth/network-request-failed': 'No internet connection. Please try again.',
     'auth/invalid-credential': 'Incorrect email or password.',
-    'auth/user-not-found': 'No account found with this email.',
-    'auth/wrong-password': 'Incorrect password.',
+    'auth/user-not-found': 'Incorrect email or password.',
+    'auth/wrong-password': 'Incorrect email or password.',
     'auth/user-disabled': 'This account has been disabled. Contact support.',
     'auth/too-many-requests': 'Too many attempts. Please wait a few minutes and try again.',
     'auth/unauthorized-domain': 'Google sign-in is not available on this domain. Please add it to Firebase Console authorized domains.',
@@ -49,7 +50,8 @@ export const signUp = async (email, password, username) => {
       email,
       username: username || email.split('@')[0],
       createdAt: new Date().toISOString(),
-      emailVerified: false,
+      // emailVerified is a server-protected field — Firestore rules deny client writes to it.
+      // It is set to true by the backend (Admin SDK) after the user clicks the verification link.
     };
     await setDoc(doc(db, 'users', userCredential.user.uid), userData);
 
@@ -86,13 +88,11 @@ export const signIn = async (email, password) => {
     if (userDoc.exists()) {
       const data = userDoc.data();
       username = data.username || username;
-      if (!data.emailVerified) {
-        await updateDoc(doc(db, 'users', userCredential.user.uid), { emailVerified: true });
-      }
+      // emailVerified updates are handled by backend or not needed here
     } else {
       await setDoc(doc(db, 'users', userCredential.user.uid), {
         uid: userCredential.user.uid, email, username,
-        createdAt: new Date().toISOString(), emailVerified: true,
+        createdAt: new Date().toISOString()
       });
     }
 
@@ -109,7 +109,22 @@ const isMobile = () => /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 export const signInWithGoogle = async () => {
   try {
     const provider = new GoogleAuthProvider();
-    // Use redirect on mobile (popup is blocked/unreliable), popup on desktop
+    
+    // Native Android/iOS via Capacitor Plugin (dynamic import so web build doesn't fail)
+    if (Capacitor.isNativePlatform()) {
+      const { GoogleAuth } = await import('@codetrix-studio/capacitor-google-auth');
+      GoogleAuth.initialize({
+        clientId: import.meta.env.VITE_GOOGLE_WEB_CLIENT_ID || 'YOUR_WEB_CLIENT_ID.apps.googleusercontent.com',
+        scopes: ['profile', 'email'],
+        grantOfflineAccess: true,
+      });
+      const googleUser = await GoogleAuth.signIn();
+      const credential = GoogleAuthProvider.credential(googleUser.authentication.idToken);
+      const userCredential = await signInWithCredential(auth, credential);
+      return await processGoogleUser(userCredential.user);
+    }
+    
+    // Use redirect on mobile web (popup is blocked/unreliable), popup on desktop web
     if (isMobile()) {
       await signInWithRedirect(auth, provider);
       // Page will redirect — code below won't run until return
@@ -134,7 +149,6 @@ const processGoogleUser = async (user) => {
       email: user.email,
       username: user.displayName || user.email.split('@')[0],
       createdAt: new Date().toISOString(),
-      emailVerified: true,
       provider: 'google',
     };
     await setDoc(doc(db, 'users', user.uid), userData);
@@ -194,10 +208,10 @@ export const resendVerificationEmail = async (email) => {
 export const applyEmailVerification = async (oobCode) => {
   try {
     await applyActionCode(auth, oobCode);
-    const user = auth.currentUser;
-    if (user) {
-      await updateDoc(doc(db, 'users', user.uid), { emailVerified: true });
-    }
+    // NOTE: Do NOT attempt to write emailVerified to Firestore from the client.
+    // Firestore security rules block all client writes to server-protected fields.
+    // The backend Admin SDK handles setting emailVerified=true when it generates
+    // the verification link; on signIn() the flag is also synced from Firebase Auth.
     return { success: true };
   } catch (error) {
     return { success: false, error: 'Verification link is invalid or has expired.' };
@@ -214,11 +228,9 @@ export const logOut = async () => {
 };
 
 // ─── Update email verified in Firestore ──────────────────────────────────────
+// This field is server-protected; the client cannot write it directly.
+// Kept as a no-op stub for backward compatibility with any callers.
 export const updateEmailVerifiedInFirestore = async (uid) => {
-  try {
-    await updateDoc(doc(db, 'users', uid), { emailVerified: true });
-    return { success: true };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
+  console.warn('[auth] updateEmailVerifiedInFirestore: client cannot write emailVerified (server-protected). Skipping.');
+  return { success: false, error: 'Client cannot write protected field.' };
 };

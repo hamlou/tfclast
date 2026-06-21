@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useUser } from '../context/UserContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import SEO from '../components/SEO';
-import { signIn, signUp, signInWithGoogle, checkGoogleRedirectResult } from '../firebase';
+import { signIn, signUp, signInWithGoogle, checkGoogleRedirectResult, resendVerificationEmail } from '../firebase';
 import './Login.css';
 
 export default function Login() {
@@ -31,6 +31,8 @@ export default function Login() {
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [showVerificationSuccess, setShowVerificationSuccess] = useState(false);
+  const [unverifiedEmail, setUnverifiedEmail] = useState('');
+  const [isResendingVerification, setIsResendingVerification] = useState(false);
 
   /* ── Check for verification success from email verification page ── */
   useEffect(() => {
@@ -152,12 +154,23 @@ export default function Login() {
         // Signup successful - redirect to verification page with credentials
         navigate('/verify-email', { state: { email } }); // S1: never pass password in state
       } else {
-        // Signup failed - show error
-        setErrorMessage(result.error || 'Oops! Something went wrong. Please try again.');
+        const errMsg = result.error || '';
+        // Special case: email already registered but unverified → resend verification
+        if (errMsg.includes('already registered') || errMsg.includes('email-already-in-use')) {
+          setIsResendingVerification(true);
+          setErrorMessage('This email is already registered but not verified. Sending a new verification email...');
+          try {
+            await resendVerificationEmail(email);
+          } catch {}
+          setIsResendingVerification(false);
+          navigate('/verify-email', { state: { email } });
+        } else {
+          setErrorMessage(errMsg || 'Oops! Something went wrong. Please try again.');
+        }
       }
     } catch (error) {
       console.error('Signup error:', error);
-      setErrorMessage('Oops! Something unexpected happened. Please try again or contact support.');
+      setErrorMessage(error.message || 'Oops! Something unexpected happened. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -186,22 +199,21 @@ export default function Login() {
         
         // Handle specific Firebase errors
         let friendlyMessage = errorMsg;
-        if (errorMsg.includes('auth/invalid-credential') || errorMsg.includes('invalid-credential')) {
-          friendlyMessage = 'Hmm, that email or password doesn\'t look right. Please try again.';
-        } else if (errorMsg.includes('auth/user-not-found')) {
-          friendlyMessage = 'We couldn\'t find an account with this email. Want to create one?';
-        } else if (errorMsg.includes('auth/wrong-password')) {
-          friendlyMessage = 'Incorrect password. Did you forget it? You can reset it below.';
+        if (errorMsg.includes('auth/invalid-credential') || errorMsg.includes('invalid-credential') || errorMsg.includes('auth/user-not-found') || errorMsg.includes('auth/wrong-password')) {
+          friendlyMessage = 'Incorrect email or password. Please try again.';
         } else if (errorMsg.includes('auth/too-many-requests')) {
           friendlyMessage = 'Too many attempts. For security, please wait a few minutes before trying again.';
         } else if (errorMsg.includes('auth/network-request-failed')) {
           friendlyMessage = 'Having trouble connecting. Please check your internet connection.';
         } else if (errorMsg === 'email-not-verified' || errorMsg.includes('email-not-verified')) {
-          friendlyMessage = 'Please verify your email first!';
-          
-          // Set error and DON'T auto-dismiss - user must click Go Back
-          setErrorMessage(friendlyMessage);
+          // User is registered but not verified → automatically resend and redirect
+          setUnverifiedEmail(email);
+          setErrorMessage('Your email is not verified yet. Sending a new verification email...');
           setIsLoading(false);
+          // Resend verification email in the background
+          try { await resendVerificationEmail(email); } catch {}
+          // Redirect to verify page where they can check their inbox
+          navigate('/verify-email', { state: { email } });
           return;
         }
         

@@ -140,7 +140,7 @@ const cacheMiddleware = (duration) => {
   };
 };
 const allowedOrigins = process.env.NODE_ENV === 'production'
-  ? [process.env.FRONTEND_URL || 'https://tfc-event.com'].filter(Boolean)
+  ? [process.env.FRONTEND_URL || 'https://tfc.events'].filter(Boolean)
   : ['http://localhost:5173', 'http://localhost:5174', process.env.FRONTEND_URL].filter(Boolean);
 app.use(cors({
   origin: allowedOrigins,
@@ -210,10 +210,10 @@ app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }), asyn
             const expiryDate = new Date(periodEnd).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
             
             await resend.emails.send({
-              from: 'TFC Championship <noreply@tfc-event.com>',
+              from: 'TFC Championship <noreply@tfc.events>',
               to: userData.email,
               subject: `Payment Successful — Welcome to ${plan}!`,
-              text: `Your payment was successful!\n\nWelcome to ${plan}. Your subscription is now active and you have full access to all TFC premium content.\n\nSubscription Details:\n- Plan: ${plan}\n- Status: Active\n- Expires: ${expiryDate}\n\nYou can now access all pro videos, exclusive content, and premium features.\n\nThank you for choosing TFC Championship!\n\nThe TFC Team\ncontact@tfc-event.com\ntfc-event.com`,
+              text: `Your payment was successful!\n\nWelcome to ${plan}. Your subscription is now active and you have full access to all TFC premium content.\n\nSubscription Details:\n- Plan: ${plan}\n- Status: Active\n- Expires: ${expiryDate}\n\nYou can now access all pro videos, exclusive content, and premium features.\n\nThank you for choosing TFC Championship!\n\nThe TFC Team\ncontact@tfc.events\ntfc.events`,
               html: `
                 <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#0a0a0a;padding:40px 20px;">
                   <table width="100%" cellpadding="0" cellspacing="0">
@@ -260,7 +260,7 @@ app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }), asyn
                           </table>
 
                           <div style="text-align:center;margin:32px 0;">
-                            <a href="https://tfc-event.com/browse"
+                            <a href="https://tfc.events/browse"
                                style="background:#e01818;color:#ffffff;text-decoration:none;font-weight:900;font-size:14px;text-transform:uppercase;letter-spacing:2px;padding:18px 48px;border-radius:12px;display:inline-block;">
                               Start Watching Now
                             </a>
@@ -272,7 +272,7 @@ app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }), asyn
                         </td></tr>
                         <tr>
                           <td style="background:#0a0a0a;padding:24px 40px;text-align:center;border-top:1px solid #222;">
-                            <p style="color:#555;font-size:12px;margin:0 0 8px;">TFC Championship &mdash; <a href="https://tfc-event.com" style="color:#e01818;text-decoration:none;">tfc-event.com</a></p>
+                            <p style="color:#555;font-size:12px;margin:0 0 8px;">TFC Championship &mdash; <a href="https://tfc.events" style="color:#e01818;text-decoration:none;">tfc.events</a></p>
                             <p style="color:#444;font-size:11px;margin:0;">
                               <a href="https://www.facebook.com/tfc.event1" style="color:#555;text-decoration:none;margin:0 8px;">Facebook</a>
                               <a href="https://www.instagram.com/tfc_events/" style="color:#555;text-decoration:none;margin:0 8px;">Instagram</a>
@@ -330,10 +330,10 @@ app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }), asyn
             if (userData?.email) {
               try {
                 await resend.emails.send({
-                  from: 'TFC Championship <noreply@tfc-event.com>',
+                  from: 'TFC Championship <noreply@tfc.events>',
                   to: userData.email,
                   subject: 'Payment Failed — Update Your Payment Method',
-                  text: `Your TFC subscription payment has failed. Please update your payment method to avoid interruption.\n\nLog in to your account and visit the Subscription page to update your payment details.\n\nTFC Championship\ncontact@tfc-event.com`,
+                  text: `Your TFC subscription payment has failed. Please update your payment method to avoid interruption.\n\nLog in to your account and visit the Subscription page to update your payment details.\n\nTFC Championship\ncontact@tfc.events`,
                   html: `
                     <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:32px;background:#ffffff;border:1px solid #e8e8e8;">
                       <h2 style="color:#c53030;border-bottom:2px solid #c53030;padding-bottom:10px;margin-top:0;">Payment Failed</h2>
@@ -344,7 +344,7 @@ app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }), asyn
                         <li>Go to the Subscription page</li>
                         <li>Click "Manage Subscription" to update your payment details</li>
                       </ol>
-                      <p style="color:#888;font-size:12px;margin-top:32px;border-top:1px solid #eee;padding-top:16px;">TFC Championship &mdash; <a href="mailto:contact@tfc-event.com" style="color:#c53030;">contact@tfc-event.com</a></p>
+                      <p style="color:#888;font-size:12px;margin-top:32px;border-top:1px solid #eee;padding-top:16px;">TFC Championship &mdash; <a href="mailto:contact@tfc.events" style="color:#c53030;">contact@tfc.events</a></p>
                     </div>
                   `,
                 });
@@ -490,10 +490,10 @@ app.post('/api/webhooks/nowpayments', express.raw({ type: 'application/json' }),
                 const expiryDate = expiresAt.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
                 
                 await resend.emails.send({
-                  from: 'TFC Championship <noreply@tfc-event.com>',
+                  from: 'TFC Championship <noreply@tfc.events>',
                   to: userData.email,
                   subject: `Payment Successful — Welcome to ${planConfig.displayName}!`,
-                  text: `Your crypto payment was successful!\n\nWelcome to ${planConfig.displayName}. Your subscription is now active and you have full access to all TFC premium content.\n\nSubscription Details:\n- Plan: ${planConfig.displayName}\n- Status: Active\n- Expires: ${expiryDate}\n- Payment Method: Crypto (USDT TRC20)\n${tipAmount > 0 ? `- Tip Amount: $${tipAmount.toFixed(2)} (Thank you!)` : ''}\n\nYou can now access all pro videos, exclusive content, and premium features.\n\nThank you for choosing TFC Championship!\n\nThe TFC Team\ncontact@tfc-event.com\ntfc-event.com`,
+                  text: `Your crypto payment was successful!\n\nWelcome to ${planConfig.displayName}. Your subscription is now active and you have full access to all TFC premium content.\n\nSubscription Details:\n- Plan: ${planConfig.displayName}\n- Status: Active\n- Expires: ${expiryDate}\n- Payment Method: Crypto (USDT TRC20)\n${tipAmount > 0 ? `- Tip Amount: $${tipAmount.toFixed(2)} (Thank you!)` : ''}\n\nYou can now access all pro videos, exclusive content, and premium features.\n\nThank you for choosing TFC Championship!\n\nThe TFC Team\ncontact@tfc.events\ntfc.events`,
                   html: `
                     <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#0a0a0a;padding:40px 20px;">
                       <table width="100%" cellpadding="0" cellspacing="0">
@@ -554,7 +554,7 @@ app.post('/api/webhooks/nowpayments', express.raw({ type: 'application/json' }),
                               </table>
 
                               <div style="text-align:center;margin:32px 0;">
-                                <a href="https://tfc-event.com/browse"
+                                <a href="https://tfc.events/browse"
                                    style="background:#10b981;color:#ffffff;text-decoration:none;font-weight:900;font-size:14px;text-transform:uppercase;letter-spacing:2px;padding:18px 48px;border-radius:12px;display:inline-block;">
                                   Start Watching Now
                                 </a>
@@ -566,7 +566,7 @@ app.post('/api/webhooks/nowpayments', express.raw({ type: 'application/json' }),
                             </td></tr>
                             <tr>
                               <td style="background:#0a0a0a;padding:24px 40px;text-align:center;border-top:1px solid #222;">
-                                <p style="color:#555;font-size:12px;margin:0 0 8px;">TFC Championship &mdash; <a href="https://tfc-event.com" style="color:#e01818;text-decoration:none;">tfc-event.com</a></p>
+                                <p style="color:#555;font-size:12px;margin:0 0 8px;">TFC Championship &mdash; <a href="https://tfc.events" style="color:#e01818;text-decoration:none;">tfc.events</a></p>
                                 <p style="color:#444;font-size:11px;margin:0;">
                                   <a href="https://www.facebook.com/tfc.event1" style="color:#555;text-decoration:none;margin:0 8px;">Facebook</a>
                                   <a href="https://www.instagram.com/tfc_events/" style="color:#555;text-decoration:none;margin:0 8px;">Instagram</a>
@@ -630,6 +630,24 @@ const verifyToken = async (req, res, next) => {
   } catch {
     return res.status(401).json({ error: 'Invalid token' });
   }
+};
+
+const DEFAULT_ADMIN_EMAILS = ['tfc.officiel@gmail.com', 'benbrayekhamza1@gmail.com', 'tfcevents67@gmail.com'];
+const ADMIN_EMAILS = [
+  ...(process.env.ADMIN_EMAILS || process.env.ADMIN_EMAIL || '')
+    .split(',')
+    .map(email => email.trim().toLowerCase())
+    .filter(Boolean),
+  ...DEFAULT_ADMIN_EMAILS,
+];
+const isAdminEmail = (email) => ADMIN_EMAILS.includes((email || '').trim().toLowerCase());
+
+// Middleware: verify token AND email must be admin
+const requireAdmin = async (req, res, next) => {
+  if (!isAdminEmail(req.email)) {
+    return res.status(403).json({ error: 'Admin access only' });
+  }
+  next();
 };
 
 // ─── Subscription middleware ──────────────────────────────────────────────────
@@ -804,7 +822,7 @@ app.get('/api/champions', async (req, res) => {
 });
 
 // ─── Admin: Get ALL champions (all statuses) ──────────────────────────────────
-app.get('/api/admin/champions', verifyToken, async (req, res) => {
+app.get('/api/admin/champions', verifyToken, requireAdmin, async (req, res) => {
   try {
     const snapshot = await db.collection('champions').get();
     const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -821,7 +839,7 @@ app.get('/api/admin/champions', verifyToken, async (req, res) => {
 });
 
 // ─── Admin: Approve or Reject a champion application ─────────────────────────
-app.patch('/api/admin/champions/:id', verifyToken, async (req, res) => {
+app.patch('/api/admin/champions/:id', verifyToken, requireAdmin, async (req, res) => {
   const { status } = req.body; // 'approved' | 'rejected'
   if (!['approved', 'rejected', 'pending'].includes(status)) {
     return res.status(400).json({ error: 'Invalid status. Use: approved, rejected, pending' });
@@ -841,6 +859,7 @@ app.patch('/api/admin/champions/:id', verifyToken, async (req, res) => {
 
 // Submit become a champion application
 app.post('/api/champions/apply',
+  verifyToken,
   upload.fields([
     { name: 'profilePicture', maxCount: 1 },
   ]),
@@ -912,11 +931,11 @@ app.post('/api/champions/apply',
       // Send confirmation email to applicant via Resend
       try {
         const applicantRes = await resend.emails.send({
-          from: 'TFC Championship <noreply@tfc-event.com>',
-          replyTo: 'contact@tfc-event.com',
+          from: 'TFC Championship <noreply@tfc.events>',
+          replyTo: 'contact@tfc.events',
           to: email,
           subject: 'Your TFC Champion application has been received',
-          text: `Hello ${firstName} ${lastName},\n\nThank you for submitting your TFC Champion application. We have received it and our team will review your profile shortly.\n\nApplication summary:\n- Name: ${firstName} ${lastName}\n- Nickname: ${nickname}\n- Weight class: ${classSpeciality}\n- Record: ${wins}W - ${losses}L\n\nWe will be in touch.\n\nThe TFC Championship Team\ncontact@tfc-event.com\ntfc-event.com`,
+          text: `Hello ${firstName} ${lastName},\n\nThank you for submitting your TFC Champion application. We have received it and our team will review your profile shortly.\n\nApplication summary:\n- Name: ${firstName} ${lastName}\n- Nickname: ${nickname}\n- Weight class: ${classSpeciality}\n- Record: ${wins}W - ${losses}L\n\nWe will be in touch.\n\nThe TFC Championship Team\ncontact@tfc.events\ntfc.events`,
           html: `
             <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;padding:40px;border:1px solid #e8e8e8;">
               <div style="border-bottom:3px solid #c53030;padding-bottom:16px;margin-bottom:24px;">
@@ -944,7 +963,7 @@ app.post('/api/champions/apply',
                 </tr>
               </table>
               <p style="color:#444;line-height:1.6;">We will be in touch with you soon.</p>
-              <p style="color:#888;font-size:12px;margin-top:32px;border-top:1px solid #eee;padding-top:16px;">TFC Championship Team &mdash; <a href="mailto:contact@tfc-event.com" style="color:#c53030;">contact@tfc-event.com</a></p>
+              <p style="color:#888;font-size:12px;margin-top:32px;border-top:1px solid #eee;padding-top:16px;">TFC Championship Team &mdash; <a href="mailto:contact@tfc.events" style="color:#c53030;">contact@tfc.events</a></p>
             </div>
           `,
         });
@@ -966,9 +985,9 @@ app.post('/api/champions/apply',
         ].filter(Boolean).join('\n');
 
         const adminRes = await resend.emails.send({
-          from: 'TFC Championship <noreply@tfc-event.com>',
+          from: 'TFC Championship <noreply@tfc.events>',
           replyTo: email,
-          to: 'contact@tfc-event.com',
+          to: 'contact@tfc.events',
           subject: `New champion application: ${firstName} ${lastName}`,
           text: `New champion application received.\n\nName: ${firstName} ${lastName}\nNickname: ${nickname}\nEmail: ${email}\nPhone: ${phone}\nDate of Birth: ${dateOfBirth}\nCountry: ${country}\nHeight: ${height}m | Weight: ${weight}kg\nAssociation: ${association}\nClass: ${classSpeciality}\nRecord: ${wins}W / ${koTko} KO / ${decisions} DEC / ${losses}L / ${submissions} SUB\nOrganisation: ${organisation}\n\nLinks:\nTapology: ${tapologyLink}\nSherdog: ${sherdogLink}\nTFC Profile: ${tfcLink}\nFacebook: ${facebookLink}\nInstagram: ${instagramLink}\nYouTube: ${youtubeLink}\n\nApplication ID: ${docRef.id}`,
           html: `
@@ -1020,23 +1039,8 @@ app.post('/api/champions/apply',
 // EVENTS ROUTES
 // ═══════════════════════════════════════════════════════════════════════════
 
-const DEFAULT_ADMIN_EMAILS = ['benbrayekhamza1@gmail.com', 'tfcevents67@gmail.com'];
-const ADMIN_EMAILS = [
-  ...(process.env.ADMIN_EMAILS || process.env.ADMIN_EMAIL || '')
-    .split(',')
-    .map(email => email.trim().toLowerCase())
-    .filter(Boolean),
-  ...DEFAULT_ADMIN_EMAILS,
-];
-const isAdminEmail = (email) => ADMIN_EMAILS.includes((email || '').trim().toLowerCase());
 
-// Middleware: verify token AND email must be admin
-const requireAdmin = async (req, res, next) => {
-  if (!isAdminEmail(req.email)) {
-    return res.status(403).json({ error: 'Admin access only' });
-  }
-  next();
-};
+
 
 // GET /api/events — public, returns all events sorted by date desc
 app.get('/api/events', cacheMiddleware(1800), async (req, res) => {
@@ -1212,11 +1216,11 @@ app.post('/api/contact', async (req, res) => {
 
   try {
     await resend.emails.send({
-      from: 'TFC Championship <noreply@tfc-event.com>',
-      to: 'contact@tfc-event.com',
+      from: 'TFC Championship <noreply@tfc.events>',
+      to: 'contact@tfc.events',
       replyTo: email,
       subject: `Message from ${safeName} \u2014 TFC website`,
-      text: `You have a new message from the TFC website contact form.\n\nFrom: ${name}\nEmail: ${email}\n\nMessage:\n${message}\n\n---\nTFC Championship\ncontact@tfc-event.com`,
+      text: `You have a new message from the TFC website contact form.\n\nFrom: ${name}\nEmail: ${email}\n\nMessage:\n${message}\n\n---\nTFC Championship\ncontact@tfc.events`,
       html: `
         <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:32px;background:#ffffff;border:1px solid #e8e8e8;">
           <h2 style="color:#c53030;border-bottom:2px solid #c53030;padding-bottom:10px;margin-top:0;">New Contact Message \u2014 TFC Website</h2>
@@ -1226,7 +1230,7 @@ app.post('/api/contact', async (req, res) => {
           </table>
           <p style="color:#555;margin-top:16px;"><strong>Message:</strong></p>
           <p style="background:#f9f9f9;border-left:4px solid #c53030;padding:16px;margin:0;color:#333;line-height:1.6;">${safeMessage}</p>
-          <p style="color:#999;font-size:12px;margin-top:24px;border-top:1px solid #eee;padding-top:16px;">TFC Championship &mdash; contact@tfc-event.com</p>
+          <p style="color:#999;font-size:12px;margin-top:24px;border-top:1px solid #eee;padding-top:16px;">TFC Championship &mdash; contact@tfc.events</p>
         </div>
       `,
     });
@@ -1266,7 +1270,7 @@ const emailWrapper = (content) => `
         <!-- Footer -->
         <tr>
           <td style="background:#0a0a0a;padding:24px 40px;text-align:center;border-top:1px solid #222;">
-            <p style="color:#555;font-size:12px;margin:0 0 8px;">TFC Championship &mdash; <a href="https://tfc-event.com" style="color:#e01818;text-decoration:none;">tfc-event.com</a></p>
+            <p style="color:#555;font-size:12px;margin:0 0 8px;">TFC Championship &mdash; <a href="https://tfc.events" style="color:#e01818;text-decoration:none;">tfc.events</a></p>
             <p style="color:#444;font-size:11px;margin:0;">
               <a href="https://www.facebook.com/tfc.event1" style="color:#555;text-decoration:none;margin:0 8px;">Facebook</a>
               <a href="https://www.instagram.com/tfc_events/" style="color:#555;text-decoration:none;margin:0 8px;">Instagram</a>
@@ -1339,12 +1343,12 @@ app.post('/api/auth/send-verification', async (req, res) => {
       </div>
     `);
 
-    const text = `Welcome to TFC Championship.\n\nPlease confirm your email address by clicking the link below:\n\n${link}\n\nThis link expires in 24 hours.\n\nIf you did not create a TFC account, ignore this email.\n\n— TFC Championship\ncontact@tfc-event.com`;
+    const text = `Welcome to TFC Championship.\n\nPlease confirm your email address by clicking the link below:\n\n${link}\n\nThis link expires in 24 hours.\n\nIf you did not create a TFC account, ignore this email.\n\n— TFC Championship\ncontact@tfc.events`;
 
     await resend.emails.send({
-      from: 'TFC Championship <noreply@tfc-event.com>',
+      from: 'TFC Championship <noreply@tfc.events>',
       to: email,
-      replyTo: 'contact@tfc-event.com',
+      replyTo: 'contact@tfc.events',
       subject: 'Confirm your TFC account',
       html,
       text,
@@ -1404,12 +1408,12 @@ app.post('/api/auth/send-reset', async (req, res) => {
       </div>
     `);
 
-    const text = `Password reset request for your TFC account.\n\nClick the link below to set a new password:\n\n${link}\n\nThis link expires in 1 hour.\n\nIf you did not request this, ignore this email. Your account is safe.\n\n— TFC Championship\ncontact@tfc-event.com`;
+    const text = `Password reset request for your TFC account.\n\nClick the link below to set a new password:\n\n${link}\n\nThis link expires in 1 hour.\n\nIf you did not request this, ignore this email. Your account is safe.\n\n— TFC Championship\ncontact@tfc.events`;
 
     await resend.emails.send({
-      from: 'TFC Championship <noreply@tfc-event.com>',
+      from: 'TFC Championship <noreply@tfc.events>',
       to: email,
-      replyTo: 'contact@tfc-event.com',
+      replyTo: 'contact@tfc.events',
       subject: 'Reset your TFC password',
       html,
       text,
@@ -1968,7 +1972,7 @@ app.post('/api/account/delete-request', verifyToken, async (req, res) => {
     `);
 
     await resend.emails.send({
-      from: 'TFC Championship <noreply@tfc-event.com>',
+      from: 'TFC Championship <noreply@tfc.events>',
       to: email,
       subject: 'TFC Account Deletion Verification Code',
       html,
