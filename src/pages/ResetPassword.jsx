@@ -5,6 +5,8 @@ import { confirmPasswordReset } from 'firebase/auth';
 import { auth } from '../firebase';
 import './Login.css';
 
+const BACKEND = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+
 export default function ResetPassword() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -16,6 +18,7 @@ export default function ResetPassword() {
   const [showNewPw, setShowNewPw] = useState(false);
   const [showConfirmPw, setShowConfirmPw] = useState(false);
   const [isValidLink, setIsValidLink] = useState(false);
+  const [isCheckingToken, setIsCheckingToken] = useState(true);
   const [isDone, setIsDone] = useState(false);
   const [countdown, setCountdown] = useState(5);
 
@@ -33,9 +36,28 @@ export default function ResetPassword() {
     const mode = searchParams.get('mode');
     const oobCode = searchParams.get('oobCode');
     if (mode === 'resetPassword' && oobCode) {
-      setIsValidLink(true);
+      // Verify token with backend (30-min expiry check)
+      fetch(`${BACKEND}/api/auth/verify-reset-token`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ oobCode }),
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.valid === false) {
+            setErrorMessage(data.error || 'This reset link has expired or is invalid. Please request a new one.');
+          } else {
+            setIsValidLink(true);
+          }
+        })
+        .catch(() => {
+          // If backend check fails, still allow Firebase to validate (backward compat)
+          setIsValidLink(true);
+        })
+        .finally(() => setIsCheckingToken(false));
     } else {
       setErrorMessage('This password reset link is invalid or has already been used. Please request a new one.');
+      setIsCheckingToken(false);
     }
   }, [searchParams]);
 
@@ -123,7 +145,13 @@ export default function ResetPassword() {
             <>
               <div className="tagline">Create a New Password</div>
 
-              {!isValidLink && (
+              {isCheckingToken && (
+                <div style={{ textAlign: 'center', padding: '20px 0', color: '#888' }}>
+                  <p>Verifying reset link...</p>
+                </div>
+              )}
+              
+              {!isCheckingToken && !isValidLink && (
                 <div style={{
                   background: 'rgba(224,24,24,0.1)', border: '1px solid rgba(224,24,24,0.35)',
                   borderRadius: 10, padding: '16px 18px', marginBottom: 20, textAlign: 'center'
@@ -141,7 +169,7 @@ export default function ResetPassword() {
                 </div>
               )}
 
-              {isValidLink && (
+              {!isCheckingToken && isValidLink && (
                 <form onSubmit={handleSubmit} style={{ marginTop: 4 }}>
                   {errorMessage && (
                     <div style={{

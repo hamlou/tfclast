@@ -25,7 +25,10 @@ const UpgradeModal = ({ isOpen, onClose }) => {
         return;
       }
       try {
-        const res = await fetch(`${BACKEND}/api/crypto/subscription-status/${currentUser.uid}`);
+        const token = await currentUser.getIdToken();
+        const res = await fetch(`${BACKEND}/api/crypto/subscription-status/${currentUser.uid}`, {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
         const data = await res.json();
         setSubStatus(data);
       } catch {

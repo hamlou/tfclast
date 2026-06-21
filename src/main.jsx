@@ -3,31 +3,24 @@ import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import './styles/globals.css'
 
-console.log('🚀 MAIN.JSX STARTING...');
-console.log('📦 React version:', React.version);
-
 try {
   const rootElement = document.getElementById('root');
-  console.log('🎯 Root element found:', rootElement ? 'YES' : 'NO');
-  
-  if (!rootElement) {
-    document.body.innerHTML = '<div style="padding:40px;color:red;font-family:Arial;"><h1>CRITICAL ERROR</h1><p>Root element #root not found!</p></div>';
-  } else {
+  if (rootElement) {
     ReactDOM.createRoot(rootElement).render(
       <React.StrictMode>
         <App />
       </React.StrictMode>,
     );
-    console.log('✅ APP RENDERED SUCCESSFULLY');
+  } else {
+    document.body.innerHTML = '<div style="padding:40px;color:red;font-family:Arial;"><h1>Error</h1><p>Root element not found</p></div>';
   }
 } catch (error) {
-  console.error('❌ FATAL ERROR in main.jsx:', error);
+  console.error('Fatal error:', error);
   document.body.innerHTML = `
-    <div style="padding:40px;color:red;font-family:Arial;background:#000;min-height:100vh;">
-      <h1>🚨 Application Crashed</h1>
-      <p><strong>Error:</strong> ${error.message}</p>
-      <p><strong>Check browser console (F12) for details</strong></p>
-      <button onclick="window.location.reload()" style="padding:10px 20px;background:#e01818;color:white;border:none;cursor:pointer;margin-top:20px;">Reload Page</button>
+    <div style="padding:40px;color:#fff;font-family:Arial;background:#0a0a0a;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;">
+      <h1 style="font-size:28px;margin-bottom:12px;">Application Error</h1>
+      <p style="color:#888;max-width:400px;margin-bottom:24px;">Something went wrong while loading the application. Please try reloading.</p>
+      <button onclick="window.location.reload()" style="padding:14px 36px;background:#e01818;color:white;border:none;border-radius:10px;font-size:14px;font-weight:800;cursor:pointer;">Reload</button>
     </div>
   `;
 }

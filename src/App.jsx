@@ -37,6 +37,7 @@ import ChampionsManager from './pages/admin/ChampionsManager';
 import EventsManager from './pages/admin/EventsManager';
 
 import LogoutModal from './components/LogoutModal';
+import ErrorBoundary from './components/ErrorBoundary';
 import MmaLanding from './pages/MmaLanding';
 import VerifyEmail from './pages/VerifyEmail';
 import ForgotPassword from './pages/ForgotPassword';
@@ -122,12 +123,22 @@ const AppRoutes = () => {
       </>
     );
   } catch (error) {
-    console.error('❌ CRITICAL ERROR in AppRoutes:', error);
+    // Never expose internal error details to users
+    if (import.meta.env.DEV) console.error('AppRoutes error:', error);
     return (
-      <div style={{ padding: '40px', color: 'red', fontFamily: 'Arial' }}>
-        <h1>App Error</h1>
-        <pre>{error.message}</pre>
-        <button onClick={() => window.location.reload()}>Reload Page</button>
+      <div style={{
+        minHeight: '100vh', display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center', background: '#0a0a0a',
+        color: '#fff', fontFamily: 'Arial', padding: 40, textAlign: 'center'
+      }}>
+        <h1 style={{ fontSize: 28, fontWeight: 900, marginBottom: 12 }}>Something Went Wrong</h1>
+        <p style={{ color: '#888', maxWidth: 400, marginBottom: 24 }}>
+          An unexpected error occurred. Please try reloading the page.
+        </p>
+        <button onClick={() => window.location.reload()} style={{
+          background: '#e01818', color: '#fff', border: 'none', borderRadius: 10,
+          padding: '14px 36px', fontSize: 14, fontWeight: 800, cursor: 'pointer'
+        }}>Reload Page</button>
       </div>
     );
   }
@@ -135,13 +146,15 @@ const AppRoutes = () => {
 
 function App() {
   return (
-    <HelmetProvider>
-      <UserProvider>
-        <BrowserRouter>
-          <AppRoutes />
-        </BrowserRouter>
-      </UserProvider>
-    </HelmetProvider>
+    <ErrorBoundary>
+      <HelmetProvider>
+        <UserProvider>
+          <BrowserRouter>
+            <AppRoutes />
+          </BrowserRouter>
+        </UserProvider>
+      </HelmetProvider>
+    </ErrorBoundary>
   );
 }
 

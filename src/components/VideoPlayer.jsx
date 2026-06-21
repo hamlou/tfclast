@@ -143,8 +143,7 @@ const YouTubePlayer = ({ url, playing, volume, playbackRate, onReady, onStateCha
               };
               
               const errorMsg = errorMessages[error.data] || `Unknown error: ${error.data}`;
-              console.error('❌ Error details:', errorMsg);
-              alert(`Video Error: ${errorMsg}`);
+              console.error('❌ Video error:', errorMsg);
               
               onError?.(error);
             }
@@ -152,7 +151,6 @@ const YouTubePlayer = ({ url, playing, volume, playbackRate, onReady, onStateCha
         });
       } catch (error) {
         console.error('❌ Failed to create YouTube Player:', error);
-        alert('Failed to load video player');
       }
     };
 

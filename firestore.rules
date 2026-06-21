@@ -1,0 +1,93 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── Helper functions ───────────────────────────────────────────────────────
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      // Admin emails are enforced server-side via ADMIN_EMAILS env var.
+      // Firestore rules provide an additional layer: only the backend Admin SDK
+      // writes role='admin', so we trust the field if it exists.
+      return isAuthenticated()
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // ─── Users collection ─────────────────────────────────────────────────────
+    // Users can ONLY access their own document.
+    match /users/{userId} {
+      // Read own document
+      allow read: if isOwner(userId);
+
+      // Create: only during signup (must set uid == auth.uid)
+      allow create: if isOwner(userId)
+        && request.resource.data.uid == userId
+        && request.resource.data.email == request.auth.token.email;
+
+      // Update: users can update their own profile fields BUT NOT protected fields
+      allow update: if isOwner(userId)
+        && !request.resource.data.diff(resource.data).affectedKeys()
+            .hasAny(['role', 'emailVerified', 'subscriptionStatus', 'subscriptionPlan',
+                     'currentPeriodEnd', 'stripeCustomerId', 'stripeSubscriptionId',
+                     'paymentMethod', 'lastCryptoOrderId']);
+    }
+
+    // ─── Public read-only collections ────────────────────────────────────────
+    match /videos/{docId} {
+      allow read: if true;
+      allow write: if false; // Only backend Admin SDK
+    }
+
+    match /pro_videos/{docId} {
+      allow read: if isAuthenticated(); // Must be logged in to list pro videos
+      allow write: if false;
+    }
+
+    match /free_videos/{docId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /categories/{docId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /events/{docId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // ─── Champions (public approved, private full data) ──────────────────────
+    match /champions/{docId} {
+      // Anyone can read approved champions
+      allow read: if resource.data.status == 'approved';
+      // Authenticated users can create applications (status forced to 'pending')
+      allow create: if isAuthenticated()
+        && request.resource.data.status == 'pending';
+      // Only the owner or admin can read non-approved champions
+      allow read: if isAuthenticated()
+        && (resource.data.email == request.auth.token.email || isAdmin());
+      // No client updates/deletes — backend Admin SDK manages approvals
+      allow update, delete: if false;
+    }
+
+    // ─── Crypto payments (owner only) ────────────────────────────────────────
+    match /crypto_payments/{orderId} {
+      allow read: if isAuthenticated()
+        && resource.data.userId == request.auth.uid;
+      allow write: if false; // Only backend writes
+    }
+
+    // ─── Catch-all: deny everything else ─────────────────────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

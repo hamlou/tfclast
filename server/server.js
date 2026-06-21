@@ -26,6 +26,8 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const compression = require('compression');
 const cache = require('memory-cache');
+const morgan = require('morgan');
+const xssClean = require('xss-clean');
 
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
@@ -99,8 +101,15 @@ async function uploadToImgBB(fileBuffer, fileName) {
 }
 
 // ─── Security & Rate Limiting ────────────────────────────────────────────────
+// ─── Security Middleware ─────────────────────────────────────────────────────
 app.use(helmet()); // Secure HTTP headers and hides X-Powered-By
+app.use(xssClean()); // Sanitize all incoming user input against XSS
 app.use(compression()); // Gzip compression for all responses
+
+// ─── Request Logging (production: combined, dev: short) ─────────────────────
+app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'short', {
+  skip: (req) => req.path === '/api/health', // skip health checks
+}));
 
 // ─── HTML Escaper (prevent XSS in email templates) ───────────────────────────
 const escapeHtml = (str) => {
@@ -120,8 +129,29 @@ const authLimiter = rateLimit({
   message: { error: 'Too many authentication attempts, please try again after 15 minutes.' }
 });
 
+const paymentLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 10, // max 10 payment requests per hour per IP
+  message: { error: 'Too many payment requests. Please try again later.' }
+});
+
+const contactLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 3, // max 3 contact form submissions per hour per IP
+  message: { error: 'Too many messages sent. Please try again later.' }
+});
+
+const writeLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30, // max 30 write operations per 15 min
+  message: { error: 'Too many write operations. Please slow down.' }
+});
+
 app.use('/api/', globalLimiter);
 app.use('/api/auth/', authLimiter);
+app.use('/api/payments/', paymentLimiter);
+app.use('/api/crypto/', paymentLimiter);
+app.use('/api/contact', contactLimiter);
 
 // ─── Caching middleware ─────────────────────────────────────────────────────
 const cacheMiddleware = (duration) => {
@@ -140,12 +170,30 @@ const cacheMiddleware = (duration) => {
   };
 };
 const allowedOrigins = process.env.NODE_ENV === 'production'
-  ? [process.env.FRONTEND_URL || 'https://tfc.events'].filter(Boolean)
+  ? [process.env.FRONTEND_URL || 'https://tfc.events', 'https://www.tfc.events'].filter(Boolean)
   : ['http://localhost:5173', 'http://localhost:5174', process.env.FRONTEND_URL].filter(Boolean);
-app.use(cors({
-  origin: allowedOrigins,
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, server-to-server)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
-}));
+  methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  maxAge: 86400, // 24h preflight cache
+};
+app.use(cors(corsOptions));
+
+// ─── CORS error handler ─────────────────────────────────────────────────────
+app.use((err, req, res, next) => {
+  if (err.message === 'Not allowed by CORS') {
+    return res.status(403).json({ error: 'Forbidden: origin not allowed' });
+  }
+  next(err);
+});
 
 // ─── Uploads directory ────────────────────────────────────────────────────────
 const uploadsDir = path.join(__dirname, 'uploads');
@@ -176,7 +224,7 @@ app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }), asyn
     event = stripeClient.webhooks.constructEvent(req.body, sig, webhookSecret);
   } catch (err) {
     console.error('❌ Webhook signature failed:', err.message);
-    return res.status(400).send(`Webhook Error: ${err.message}`);
+    return res.status(400).json({ error: 'Webhook signature verification failed' });
   }
 
   console.log('✅ Webhook:', event.type);
@@ -615,6 +663,12 @@ app.post('/api/webhooks/nowpayments', express.raw({ type: 'application/json' }),
   }
 });
 
+// ─── Generic error helper (never leak internals) ─────────────────────────────
+const serverError = (res, logPrefix, err) => {
+  console.error(`${logPrefix}:`, err?.message || err);
+  return res.status(500).json({ error: 'An internal error occurred. Please try again later.' });
+};
+
 // ─── JSON body parser ─────────────────────────────────────────────────────────
 app.use(express.json({ limit: '10kb' })); // Reject oversized payloads to prevent DoS
 
@@ -731,7 +785,7 @@ app.post('/api/payments/verify-session', verifyToken, async (req, res) => {
     res.json({ success: true, plan });
   } catch (err) {
     console.error('❌ Verify session error:', err);
-    res.status(500).json({ error: err.message });
+    serverError(res, 'API error', err);
   }
 });
 
@@ -746,7 +800,7 @@ app.post('/api/payments/portal', verifyToken, async (req, res) => {
     });
     res.json({ url: portalSession.url });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    serverError(res, 'API error', err);
   }
 });
 
@@ -757,7 +811,7 @@ app.get('/api/payments/subscription-status', verifyToken, async (req, res) => {
     const data = userDoc.data();
     res.json({ status: data.subscriptionStatus || 'none', plan: data.subscriptionPlan || null, currentPeriodEnd: data.currentPeriodEnd?.toDate()?.toISOString() || null });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    serverError(res, 'API error', err);
   }
 });
 
@@ -770,7 +824,7 @@ app.get('/api/pro/videos', verifyToken, requireActiveSubscription, async (req, r
     const snapshot = await db.collection('pro_videos').orderBy('order').get();
     res.json(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    serverError(res, 'API error', err);
   }
 });
 
@@ -780,7 +834,7 @@ app.get('/api/pro/videos/:videoId', verifyToken, requireActiveSubscription, asyn
     if (!doc.exists) return res.status(404).json({ error: 'Not found' });
     res.json({ id: doc.id, ...doc.data() });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    serverError(res, 'API error', err);
   }
 });
 
@@ -789,7 +843,7 @@ app.get('/api/free/videos', async (req, res) => {
     const snapshot = await db.collection('free_videos').orderBy('order').get();
     res.json(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    serverError(res, 'API error', err);
   }
 });
 
@@ -817,7 +871,7 @@ app.get('/api/champions', async (req, res) => {
     res.json(docs);
   } catch (err) {
     console.error('❌ Champions error:', err);
-    res.status(500).json({ error: err.message });
+    serverError(res, 'API error', err);
   }
 });
 
@@ -834,7 +888,7 @@ app.get('/api/admin/champions', verifyToken, requireAdmin, async (req, res) => {
     res.json(docs);
   } catch (err) {
     console.error('❌ Admin champions error:', err);
-    res.status(500).json({ error: err.message });
+    serverError(res, 'API error', err);
   }
 });
 
@@ -853,7 +907,7 @@ app.patch('/api/admin/champions/:id', verifyToken, requireAdmin, async (req, res
     res.json({ success: true, id: req.params.id, status });
   } catch (err) {
     console.error('❌ Admin champion update error:', err);
-    res.status(500).json({ error: err.message });
+    serverError(res, 'API error', err);
   }
 });
 
@@ -874,9 +928,49 @@ app.post('/api/champions/apply',
 
       // Validate required fields
       const required = { firstName, lastName, nickname, phone, email, dateOfBirth, country, height, weight, association, classSpeciality, wins, decisions, losses, submissions, organisation };
-      const missing = Object.entries(required).filter(([, v]) => !v || v.trim() === '').map(([k]) => k);
+      const missing = Object.entries(required).filter(([, v]) => !v || String(v).trim() === '').map(([k]) => k);
       if (missing.length > 0) {
         return res.status(400).json({ error: `Missing required fields: ${missing.join(', ')}` });
+      }
+
+      // Input length validation (prevent abuse)
+      const MAX_STR = 100;
+      const stringFields = { firstName, lastName, nickname, phone, country, association, classSpeciality, organisation };
+      for (const [key, val] of Object.entries(stringFields)) {
+        if (String(val).length > MAX_STR) {
+          return res.status(400).json({ error: `${key} must be under ${MAX_STR} characters` });
+        }
+      }
+      if (email.length > 254) return res.status(400).json({ error: 'Email too long' });
+
+      // Email format validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ error: 'Please enter a valid email address' });
+      }
+
+      // Numeric validation for record fields
+      const numFields = { wins, koTko, decisions, losses, submissions, height, weight };
+      for (const [key, val] of Object.entries(numFields)) {
+        const num = parseFloat(val);
+        if (isNaN(num) || num < 0 || num > 9999) {
+          return res.status(400).json({ error: `Invalid value for ${key}` });
+        }
+      }
+
+      // URL validation for link fields (allow empty, but if present must be valid URL)
+      const linkFields = { tapologyLink, sherdogLink, tfcLink, facebookLink, instagramLink, youtubeLink };
+      const urlRegex = /^https?:\/\/.+/i;
+      for (const [key, val] of Object.entries(linkFields)) {
+        if (val && val.trim() && !urlRegex.test(val.trim())) {
+          return res.status(400).json({ error: `${key} must be a valid URL starting with http:// or https://` });
+        }
+      }
+
+      // Phone validation (digits, spaces, +, -, (, ) only)
+      const phoneRegex = /^[\d\s+\-().]{5,20}$/;
+      if (!phoneRegex.test(phone)) {
+        return res.status(400).json({ error: 'Please enter a valid phone number' });
       }
 
       if (!req.files?.profilePicture) {
@@ -1030,7 +1124,7 @@ app.post('/api/champions/apply',
       res.json({ success: true, id: docRef.id, message: 'Application submitted successfully!' });
     } catch (err) {
       console.error('❌ Champion apply error:', err);
-      res.status(500).json({ error: err.message });
+      serverError(res, 'API error', err);
     }
   }
 );
@@ -1051,7 +1145,7 @@ app.get('/api/events', cacheMiddleware(1800), async (req, res) => {
     res.json(docs);
   } catch (err) {
     console.error('❌ Events fetch error:', err);
-    res.status(500).json({ error: err.message });
+    serverError(res, 'API error', err);
   }
 });
 
@@ -1100,7 +1194,7 @@ app.post('/api/admin/events', verifyToken, requireAdmin, async (req, res) => {
     res.json({ success: true, id: docRef.id });
   } catch (err) {
     console.error('❌ Create event error:', err);
-    res.status(500).json({ error: err.message });
+    serverError(res, 'API error', err);
   }
 });
 
@@ -1144,7 +1238,7 @@ app.patch('/api/admin/events/:id', verifyToken, requireAdmin, async (req, res) =
     res.json({ success: true, id: req.params.id });
   } catch (err) {
     console.error('❌ Update event error:', err);
-    res.status(500).json({ error: err.message });
+    serverError(res, 'API error', err);
   }
 });
 
@@ -1159,7 +1253,7 @@ app.delete('/api/admin/events/:id', verifyToken, requireAdmin, async (req, res) 
     res.json({ success: true });
   } catch (err) {
     console.error('❌ Delete event error:', err);
-    res.status(500).json({ error: err.message });
+    serverError(res, 'API error', err);
   }
 });
 
@@ -1190,7 +1284,7 @@ app.post('/api/admin/sync-auth-users', verifyToken, requireAdmin, async (req, re
     res.json({ success: true, deletedOrphans: deleted.length, deleted });
   } catch (err) {
     console.error('❌ Sync error:', err);
-    res.status(500).json({ error: err.message });
+    serverError(res, 'API error', err);
   }
 });
 
@@ -1363,10 +1457,28 @@ app.post('/api/auth/send-verification', async (req, res) => {
   }
 });
 
+// ─── Password Reset Token Tracking (30-min hard expiry) ─────────────────────
+const resetTokenStore = new Map(); // oobCode -> { email, expiresAt }
+const RESET_TOKEN_EXPIRY_MS = 30 * 60 * 1000; // 30 minutes
+
+// Periodic cleanup of expired tokens (every 10 min)
+setInterval(() => {
+  const now = Date.now();
+  for (const [code, data] of resetTokenStore) {
+    if (now > data.expiresAt) resetTokenStore.delete(code);
+  }
+}, 10 * 60 * 1000);
+
 // ─── Send Password Reset Email ────────────────────────────────────────────────
 app.post('/api/auth/send-reset', async (req, res) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ error: 'Email is required' });
+
+  // Input validation: email format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email) || email.length > 254) {
+    return res.status(400).json({ error: 'Please enter a valid email address.' });
+  }
 
   const rl = checkRateLimit(`reset_${email}`);
   if (rl.limited) return res.status(429).json({ error: `Please wait ${rl.waitSec} seconds before requesting another email.` });
@@ -1379,6 +1491,15 @@ app.post('/api/auth/send-reset', async (req, res) => {
     };
 
     const link = await admin.auth().generatePasswordResetLink(email, actionCodeSettings);
+
+    // Extract oobCode and track with 30-min hard expiry
+    const oobCodeMatch = link.match(/oobCode=([^&]+)/);
+    if (oobCodeMatch) {
+      resetTokenStore.set(oobCodeMatch[1], {
+        email: email.toLowerCase(),
+        expiresAt: Date.now() + RESET_TOKEN_EXPIRY_MS,
+      });
+    }
 
     const html = emailWrapper(`
       <h2 style="color:#ffffff;font-size:24px;font-weight:800;margin:0 0 8px;text-transform:uppercase;letter-spacing:-0.5px;">Reset Your Password</h2>
@@ -1402,13 +1523,13 @@ app.post('/api/auth/send-reset', async (req, res) => {
 
       <div style="margin-top:28px;padding:16px;background:#1a1a1a;border-left:3px solid #e01818;border-radius:4px;">
         <p style="color:#888;font-size:12px;margin:0;line-height:1.6;">
-          <strong style="color:#aaa;">This link expires in 1 hour.</strong><br/>
+          <strong style="color:#aaa;">This link expires in 30 minutes.</strong><br/>
           If you did not request a password reset, your account is safe — simply ignore this email.
         </p>
       </div>
     `);
 
-    const text = `Password reset request for your TFC account.\n\nClick the link below to set a new password:\n\n${link}\n\nThis link expires in 1 hour.\n\nIf you did not request this, ignore this email. Your account is safe.\n\n— TFC Championship\ncontact@tfc.events`;
+    const text = `Password reset request for your TFC account.\n\nClick the link below to set a new password:\n\n${link}\n\nThis link expires in 30 minutes.\n\nIf you did not request this, ignore this email. Your account is safe.\n\n— TFC Championship\ncontact@tfc.events`;
 
     await resend.emails.send({
       from: 'TFC Championship <noreply@tfc.events>',
@@ -1426,6 +1547,26 @@ app.post('/api/auth/send-reset', async (req, res) => {
     if (err.code === 'auth/user-not-found') return res.json({ success: true });
     res.status(500).json({ error: 'Failed to send reset email. Please try again.' });
   }
+});
+
+// ─── Verify Reset Token (check 30-min expiry before showing form) ────────────
+app.post('/api/auth/verify-reset-token', async (req, res) => {
+  const { oobCode } = req.body;
+  if (!oobCode) return res.status(400).json({ valid: false, error: 'Missing token' });
+
+  const stored = resetTokenStore.get(oobCode);
+  if (!stored) {
+    // Token not tracked — could be expired or from before tracking was enabled
+    console.warn('Reset token not in store, deferring to Firebase validation');
+    return res.json({ valid: true, untracked: true });
+  }
+
+  if (Date.now() > stored.expiresAt) {
+    resetTokenStore.delete(oobCode);
+    return res.status(400).json({ valid: false, error: 'This reset link has expired. Please request a new one.' });
+  }
+
+  return res.json({ valid: true, email: stored.email });
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1464,7 +1605,7 @@ app.post('/api/crypto/create-payment', verifyToken, async (req, res) => {
     res.json({ payment_url: response.data.invoice_url });
   } catch (err) {
     console.error('\u274C NOWPayments create-payment error:', err.response?.data || err.message);
-    res.status(500).json({ error: err.response?.data?.message || 'Failed to create crypto payment' });
+    res.status(500).json({ error: 'Payment service temporarily unavailable' });
   }
 });
 
@@ -1519,7 +1660,7 @@ app.get('/api/admin/videos', verifyToken, requireAdmin, async (req, res) => {
     res.json(videos);
   } catch (err) {
     console.error('❌ Admin videos fetch error:', err);
-    res.status(500).json({ error: err.message });
+    serverError(res, 'API error', err);
   }
 });
 
@@ -1550,7 +1691,7 @@ app.post('/api/admin/videos', verifyToken, requireAdmin, async (req, res) => {
     res.json({ success: true, id: docRef.id });
   } catch (err) {
     console.error('❌ Create video error:', err);
-    res.status(500).json({ error: err.message });
+    serverError(res, 'API error', err);
   }
 });
 
@@ -1577,7 +1718,7 @@ app.patch('/api/admin/videos/:id', verifyToken, requireAdmin, async (req, res) =
     res.json({ success: true, id: req.params.id });
   } catch (err) {
     console.error('❌ Edit video error:', err);
-    res.status(500).json({ error: err.message });
+    serverError(res, 'API error', err);
   }
 });
 
@@ -1592,7 +1733,7 @@ app.delete('/api/admin/videos/:id', verifyToken, requireAdmin, async (req, res) 
     res.json({ success: true });
   } catch (err) {
     console.error('❌ Delete video error:', err);
-    res.status(500).json({ error: err.message });
+    serverError(res, 'API error', err);
   }
 });
 
@@ -1658,7 +1799,7 @@ app.get('/api/videos', cacheMiddleware(1800), async (req, res) => {
     res.json(videos);
   } catch (err) {
     console.error('❌ Public videos fetch error:', err);
-    res.status(500).json({ error: err.message });
+    serverError(res, 'API error', err);
   }
 });
 
@@ -1684,7 +1825,7 @@ app.get('/api/admin/categories', verifyToken, requireAdmin, async (req, res) => 
     res.json(categories);
   } catch (err) {
     console.error('❌ Admin categories fetch error:', err);
-    res.status(500).json({ error: err.message });
+    serverError(res, 'API error', err);
   }
 });
 
@@ -1703,7 +1844,7 @@ app.post('/api/admin/categories', verifyToken, requireAdmin, async (req, res) =>
     res.json({ success: true, id: docRef.id });
   } catch (err) {
     console.error('❌ Add category error:', err);
-    res.status(500).json({ error: err.message });
+    serverError(res, 'API error', err);
   }
 });
 
@@ -1729,7 +1870,7 @@ app.patch('/api/admin/categories/:id', verifyToken, requireAdmin, async (req, re
     res.json({ success: true, id: req.params.id });
   } catch (err) {
     console.error('❌ Edit category error:', err);
-    res.status(500).json({ error: err.message });
+    serverError(res, 'API error', err);
   }
 });
 
@@ -1750,7 +1891,7 @@ app.delete('/api/admin/categories/:id', verifyToken, requireAdmin, async (req, r
     res.json({ success: true });
   } catch (err) {
     console.error('❌ Delete category error:', err);
-    res.status(500).json({ error: err.message });
+    serverError(res, 'API error', err);
   }
 });
 
@@ -1762,7 +1903,7 @@ app.get('/api/categories', async (req, res) => {
     res.json(categories);
   } catch (err) {
     console.error('❌ Public categories fetch error:', err);
-    res.status(500).json({ error: err.message });
+    serverError(res, 'API error', err);
   }
 });
 
@@ -1798,7 +1939,7 @@ app.get('/api/admin/users', verifyToken, requireAdmin, async (req, res) => {
     res.json(users);
   } catch (err) {
     console.error('❌ Admin users fetch error:', err);
-    res.status(500).json({ error: err.message });
+    serverError(res, 'API error', err);
   }
 });
 
@@ -1834,7 +1975,7 @@ app.delete('/api/admin/users/:uid', verifyToken, requireAdmin, async (req, res) 
     res.json({ success: true });
   } catch (err) {
     console.error('❌ Admin delete user error:', err);
-    res.status(500).json({ error: err.message });
+    serverError(res, 'API error', err);
   }
 });
 
@@ -1856,7 +1997,7 @@ app.patch('/api/admin/users/:uid/role', verifyToken, requireAdmin, async (req, r
     res.json({ success: true, uid, role });
   } catch (err) {
     console.error('❌ Admin role update error:', err);
-    res.status(500).json({ error: err.message });
+    serverError(res, 'API error', err);
   }
 });
 
@@ -1926,7 +2067,7 @@ app.get('/api/admin/stats', verifyToken, requireAdmin, async (req, res) => {
     });
   } catch (err) {
     console.error('❌ Admin stats error:', err);
-    res.status(500).json({ error: err.message });
+    serverError(res, 'API error', err);
   }
 });
 
