@@ -27,7 +27,34 @@ const rateLimit = require('express-rate-limit');
 const compression = require('compression');
 const cache = require('memory-cache');
 const morgan = require('morgan');
-const xssClean = require('xss-clean');
+
+// ─── Custom XSS sanitizer (xss-clean is incompatible with Express 5) ────────
+const sanitizeValue = (val) => {
+  if (typeof val === 'string') {
+    return val.replace(/[<>]/g, '')
+      .replace(/javascript:/gi, '')
+      .replace(/on\w+=/gi, '');
+  }
+  if (Array.isArray(val)) return val.map(sanitizeValue);
+  if (val && typeof val === 'object') {
+    const sanitized = {};
+    for (const [k, v] of Object.entries(val)) {
+      sanitized[k] = sanitizeValue(v);
+    }
+    return sanitized;
+  }
+  return val;
+};
+
+const xssSanitizer = (req, res, next) => {
+  if (req.body) req.body = sanitizeValue(req.body);
+  if (req.query) {
+    const sanitized = sanitizeValue(req.query);
+    Object.assign(req.query, sanitized);
+  }
+  if (req.params) req.params = sanitizeValue(req.params);
+  next();
+};
 
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
@@ -103,7 +130,7 @@ async function uploadToImgBB(fileBuffer, fileName) {
 // ─── Security & Rate Limiting ────────────────────────────────────────────────
 // ─── Security Middleware ─────────────────────────────────────────────────────
 app.use(helmet()); // Secure HTTP headers and hides X-Powered-By
-app.use(xssClean()); // Sanitize all incoming user input against XSS
+app.use(xssSanitizer); // Sanitize all incoming user input against XSS
 app.use(compression()); // Gzip compression for all responses
 
 // ─── Request Logging (production: combined, dev: short) ─────────────────────
