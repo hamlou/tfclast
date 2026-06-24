@@ -1,6 +1,9 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { Capacitor } from '@capacitor/core';
+import { initGoogleAuth, checkGoogleRedirectResult } from './firebase';
+
 import { UserProvider, useUser } from './context/UserContext';
 import { HelmetProvider } from 'react-helmet-async';
 import DashboardLayout from './layouts/DashboardLayout';
@@ -49,8 +52,30 @@ import DeleteAccount from './pages/DeleteAccount';
 
 const AppRoutes = () => {
   try {
-    const { user, isLogoutModalOpen, setIsLogoutModalOpen, logout } = useUser();
+    const { user, isLogoutModalOpen, setIsLogoutModalOpen, logout, login } = useUser();
     const navigate = useNavigate();
+
+    useEffect(() => {
+      if (Capacitor.isNativePlatform()) {
+        const timer = setTimeout(() => {
+          import('@capacitor/splash-screen').then(({ SplashScreen }) => {
+            SplashScreen.hide({ fadeOutDuration: 300 });
+          });
+        }, 2000);
+        return () => clearTimeout(timer);
+      }
+    }, []);
+
+    // Check for Google redirect result on every page load (not just Login)
+    useEffect(() => {
+      if (Capacitor.isNativePlatform() || user) return;
+      checkGoogleRedirectResult().then(result => {
+        if (result && result.success) {
+          const u = result.user;
+          login(u.email, 'google-oauth', result.username);
+        }
+      });
+    }, []);
 
     const handleLogoutConfirm = () => {
       setIsLogoutModalOpen(false);
@@ -145,6 +170,13 @@ const AppRoutes = () => {
 };
 
 function App() {
+  useEffect(() => {
+    // Pre-initialize Google Auth on native so it's instant when user taps the button
+    initGoogleAuth().catch(() => {});
+
+
+  }, []);
+
   return (
     <ErrorBoundary>
       <HelmetProvider>

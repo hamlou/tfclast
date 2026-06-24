@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useUser } from '../context/UserContext';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import SEO from '../components/SEO';
 import { signIn, signUp, signInWithGoogle, checkGoogleRedirectResult, resendVerificationEmail } from '../firebase';
 import './Login.css';
@@ -25,6 +25,7 @@ export default function Login() {
   const [signupConfirm, setSignupConfirm] = useState('');
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
+  const [ageConfirmed, setAgeConfirmed] = useState(false); // Age confirmation checkbox
 
   // Firebase authentication state
   const [isLoading, setIsLoading] = useState(false);
@@ -33,6 +34,15 @@ export default function Login() {
   const [showVerificationSuccess, setShowVerificationSuccess] = useState(false);
   const [unverifiedEmail, setUnverifiedEmail] = useState('');
   const [isResendingVerification, setIsResendingVerification] = useState(false);
+
+  const [showPreLoginSplash, setShowPreLoginSplash] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowPreLoginSplash(false);
+    }, 3500);
+    return () => clearTimeout(timer);
+  }, []);
 
   /* ── Check for verification success from email verification page ── */
   useEffect(() => {
@@ -108,6 +118,13 @@ export default function Login() {
     const email = signupEmail;
     const password = signupPassword;
     const confirmPassword = signupConfirm;
+
+    // Age confirmation check
+    if (!ageConfirmed) {
+      alert("You must check this box or accept these terms and conditions before you can sign up.");
+      setIsLoading(false);
+      return;
+    }
 
     // Check if passwords match
     if (password !== confirmPassword) {
@@ -231,6 +248,13 @@ export default function Login() {
     setErrorMessage('');
     setSuccessMessage('');
 
+    // Age confirmation check ONLY for signup tab
+    if (activeTab === 'signup' && !ageConfirmed) {
+      setErrorMessage('You must confirm that you are at least 13 years old to create an account.');
+      setIsLoading(false);
+      return;
+    }
+
     try {
       console.log('🔍 Starting Google Sign-In...');
       const result = await signInWithGoogle();
@@ -302,6 +326,12 @@ export default function Login() {
         title="Login"
         description="Login to your TFC account to access exclusive live events and premium content."
       />
+
+      {showPreLoginSplash && (
+        <div className="prelogin-splash">
+          <img src="/beforelogin.png" alt="TFC" className="prelogin-image" />
+        </div>
+      )}
 
       {/* Identical background from tfc-auth.html */}
       <div className="bg"></div>
@@ -505,6 +535,7 @@ export default function Login() {
             </button>
             <div className="switch-text">First time here? <span onClick={() => handleTabSwitch('signup')}>Create account</span></div>
             <div className="divider"><span>or continue with</span></div>
+            
             <button type="button" className="btn-google" onClick={handleGoogleSignIn}>
               <svg viewBox="0 0 48 48">
                 <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
@@ -621,6 +652,52 @@ export default function Login() {
                   </svg>
                 </button>
               </div>
+            </div>
+
+            {/* Age Confirmation Checkbox */}
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'flex-start', 
+              gap: '10px', 
+              marginBottom: '20px',
+              padding: '12px',
+              background: 'rgba(224, 24, 24, 0.05)',
+              border: '1px solid rgba(224, 24, 24, 0.2)',
+              borderRadius: '8px'
+            }}>
+              <input 
+                type="checkbox"
+                id="age-confirm"
+                checked={ageConfirmed}
+                onChange={(e) => setAgeConfirmed(e.target.checked)}
+                required
+                style={{
+                  marginTop: '3px',
+                  width: '18px',
+                  height: '18px',
+                  cursor: 'pointer',
+                  accentColor: '#e01818'
+                }}
+              />
+              <label 
+                htmlFor="age-confirm" 
+                style={{ 
+                  fontSize: '13px', 
+                  color: '#ccc',
+                  lineHeight: '1.5',
+                  cursor: 'pointer',
+                  userSelect: 'none'
+                }}
+              >
+                I confirm that I am at least <strong style={{ color: '#e01818' }}>13 years old</strong> and agree to the{' '}
+                <Link to="/terms" target="_blank" rel="noopener noreferrer" style={{ color: '#e01818', textDecoration: 'none', fontWeight: 600 }}>
+                  Terms of Service
+                </Link>
+                {' '}and{' '}
+                <Link to="/privacy-policy" target="_blank" rel="noopener noreferrer" style={{ color: '#e01818', textDecoration: 'none', fontWeight: 600 }}>
+                  Privacy Policy
+                </Link>
+              </label>
             </div>
 
             <button type="submit" className="btn-primary" disabled={isLoading}>

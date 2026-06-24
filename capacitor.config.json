@@ -5,21 +5,25 @@
   "android": {
     "allowMixedContent": false,
     "captureInput": true,
-    "webContentsDebuggingEnabled": false
+    "webContentsDebuggingEnabled": false,
+    "backgroundColor": "#000000"
   },
   "plugins": {
     "GoogleAuth": {
       "scopes": ["profile", "email"],
-      "serverClientId": "273530712994-daljg27vvg7qof6veptjje95pfdke3g7.apps.googleusercontent.com",
+      "serverClientId": "1027395831145-8m9gurndnhfji7rdjvnvbntnt0bco8oa.apps.googleusercontent.com",
       "forceCodeForRefreshToken": true
     },
     "SplashScreen": {
-      "launchShowDuration": 3000,
-      "launchAutoHide": true,
-      "backgroundColor": "#ffffff",
+      "launchShowDuration": 4000,
+      "launchAutoHide": false,
+      "backgroundColor": "#000000",
       "androidSplashResourceName": "splash",
       "androidScaleType": "CENTER_INSIDE",
-      "showSpinner": false
+      "showSpinner": false,
+      "splashFullScreen": true,
+      "splashImmersive": true,
+      "useDialog": false
     }
   }
 }

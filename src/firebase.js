@@ -105,33 +105,112 @@ export const signIn = async (email, password) => {
 // ─── Mobile detection ────────────────────────────────────────────────────────
 const isMobile = () => /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
+// ─── GoogleAuth singleton — initialized once at app startup ──────────────────
+let _googleAuthInitialized = false;
+let _googleAuthInitPromise = null;
+
+export const initGoogleAuth = async () => {
+  if (!Capacitor.isNativePlatform()) return;
+  if (_googleAuthInitialized) return;
+  if (_googleAuthInitPromise) return _googleAuthInitPromise;
+
+  _googleAuthInitPromise = (async () => {
+    try {
+      const { GoogleAuth } = await import('@codetrix-studio/capacitor-google-auth');
+      await GoogleAuth.initialize({
+        clientId: '1027395831145-8m9gurndnhfji7rdjvnvbntnt0bco8oa.apps.googleusercontent.com',
+        scopes: ['profile', 'email'],
+        grantOfflineAccess: true,
+      });
+      _googleAuthInitialized = true;
+      console.log('✅ GoogleAuth pre-initialized successfully');
+    } catch (err) {
+      console.warn('⚠️ GoogleAuth pre-init failed:', err);
+      _googleAuthInitPromise = null; // allow retry
+    }
+  })();
+
+  return _googleAuthInitPromise;
+};
+
 // ─── Google Sign In ───────────────────────────────────────────────────────────
 export const signInWithGoogle = async () => {
   try {
     const provider = new GoogleAuthProvider();
     
-    // Native Android/iOS via Capacitor Plugin (dynamic import so web build doesn't fail)
+    // Native Android/iOS via Capacitor Plugin
     if (Capacitor.isNativePlatform()) {
-      const { GoogleAuth } = await import('@codetrix-studio/capacitor-google-auth');
-      GoogleAuth.initialize({
-        clientId: import.meta.env.VITE_GOOGLE_WEB_CLIENT_ID || 'YOUR_WEB_CLIENT_ID.apps.googleusercontent.com',
-        scopes: ['profile', 'email'],
-        grantOfflineAccess: true,
-      });
-      const googleUser = await GoogleAuth.signIn();
-      const credential = GoogleAuthProvider.credential(googleUser.authentication.idToken);
-      const userCredential = await signInWithCredential(auth, credential);
-      return await processGoogleUser(userCredential.user);
+      try {
+        const { GoogleAuth } = await import('@codetrix-studio/capacitor-google-auth');
+
+        // Ensure initialized (no-op if already done at startup)
+        if (!_googleAuthInitialized) {
+          await GoogleAuth.initialize({
+            clientId: '1027395831145-8m9gurndnhfji7rdjvnvbntnt0bco8oa.apps.googleusercontent.com',
+            scopes: ['profile', 'email'],
+            grantOfflineAccess: true,
+          });
+          _googleAuthInitialized = true;
+        }
+
+        console.log('🔐 Starting native Google Sign-In...');
+
+        // Race sign-in against a 120s timeout (increased from 30s)
+        const googleUser = await Promise.race([
+          GoogleAuth.signIn(),
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Sign-in timed out. Please try again.')), 120000)
+          ),
+        ]);
+
+        console.log('✅ Google user received:', googleUser?.email);
+        
+        if (!googleUser || !googleUser.authentication || !googleUser.authentication.idToken) {
+          console.error('Google Sign-In failed: No authentication data');
+          return { success: false, error: 'Google Sign-In failed. Please try again.' };
+        }
+        
+        const credential = GoogleAuthProvider.credential(googleUser.authentication.idToken);
+        const userCredential = await signInWithCredential(auth, credential);
+        return await processGoogleUser(userCredential.user);
+      } catch (nativeError) {
+        console.error('Native Google Auth error:', nativeError);
+        const errorMsg = nativeError?.message || String(nativeError) || 'Unknown error';
+        if (errorMsg.includes('timed out')) {
+          return { success: false, error: 'Sign-in timed out. Please check your internet connection and try again.' };
+        }
+        if (errorMsg.includes('cancel') || errorMsg.includes('dismiss')) {
+          return { success: false, error: 'Sign-in was cancelled. Please try again.' };
+        }
+        return { success: false, error: `Google Sign-In failed: ${errorMsg}` };
+      }
     }
     
-    // Use redirect on mobile web (popup is blocked/unreliable), popup on desktop web
-    if (isMobile()) {
-      await signInWithRedirect(auth, provider);
-      // Page will redirect — code below won't run until return
-      return { success: false, error: 'redirect-in-progress' };
+    // Use redirect for mobile web, and popup for desktop
+    // Mobile browsers heavily block popups or silently fail with signInWithPopup
+    provider.setCustomParameters({
+      prompt: 'select_account'
+    });
+    
+    if (isMobile() && !Capacitor.isNativePlatform()) {
+      // Try popup first (works on modern mobile Chrome/Safari when triggered by user tap)
+      try {
+        const userCredential = await signInWithPopup(auth, provider);
+        return await processGoogleUser(userCredential.user);
+      } catch (popupError) {
+        if (popupError.code === 'auth/popup-blocked') {
+          console.log('📱 Mobile popup blocked, falling back to redirect...');
+          sessionStorage.setItem('google_redirect_pending', 'true');
+          await signInWithRedirect(auth, provider);
+          await new Promise(resolve => setTimeout(resolve, 5000));
+          return { success: true, pendingRedirect: true };
+        }
+        throw popupError;
+      }
+    } else {
+      const userCredential = await signInWithPopup(auth, provider);
+      return await processGoogleUser(userCredential.user);
     }
-    const userCredential = await signInWithPopup(auth, provider);
-    return await processGoogleUser(userCredential.user);
   } catch (error) {
     console.error('Google Sign-In error:', error.code, error.message);
     return { success: false, error: friendlyError(error.code) };
@@ -156,16 +235,27 @@ const processGoogleUser = async (user) => {
   }
 };
 
-// ─── Check redirect result (call on Login page mount) ───────────────────────────
+// ─── Check redirect result (call on every page load) ────────────────────────────
 export const checkGoogleRedirectResult = async () => {
   try {
     const result = await getRedirectResult(auth);
     if (result && result.user) {
+      sessionStorage.removeItem('google_redirect_pending');
       return await processGoogleUser(result.user);
     }
-    return null; // No redirect result
+    // Redirect was started but returned no result — likely domain not authorized
+    if (sessionStorage.getItem('google_redirect_pending')) {
+      sessionStorage.removeItem('google_redirect_pending');
+      console.error('Google redirect returned no result (unauthorized domain?)');
+      return { success: false, error: 'Google sign-in is not configured for this domain. Please use email and password instead.' };
+    }
+    return null; // No redirect result — normal page load
   } catch (error) {
     console.error('Google redirect result error:', error.code, error.message);
+    sessionStorage.removeItem('google_redirect_pending');
+    if (error.code === 'auth/unauthorized-domain') {
+      return { success: false, error: 'Google sign-in is not configured for this domain. Please add this domain to Firebase Console authorized domains, or use email and password.' };
+    }
     return { success: false, error: friendlyError(error.code) };
   }
 };
