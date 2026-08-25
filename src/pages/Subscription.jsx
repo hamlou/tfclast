@@ -249,6 +249,8 @@ const Subscription = () => {
       {/* ══════════════════════════════════════════════════════ */}
       {/* ── Crypto Payment Section ── */}
       {/* ══════════════════════════════════════════════════════ */}
+      {/* TO RESTORE CRYPTO: Change false below to true */}
+      {false && (
       <div className="mt-24">
         <div className="flex items-center mb-12">
           <div className="flex-1 h-px bg-gray-800"></div>
@@ -374,6 +376,7 @@ const Subscription = () => {
           </>
         )}
       </div>
+      )}
 
       {/* Trust Badges */}
       <div className="mt-12 sm:mt-20 flex flex-wrap justify-center gap-6 sm:gap-12 opacity-50">

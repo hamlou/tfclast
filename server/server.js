@@ -68,6 +68,11 @@ const stripeClient = stripe(process.env.STRIPE_SECRET_KEY);
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 // ─── Initialize NOWPayments (Crypto Payments) ────────────────────────────────
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  CRYPTO PAYMENTS FEATURE FLAG - TO RESTORE: Change false to true         ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+const CRYPTO_PAYMENTS_ENABLED = false;
+
 const NOWPAYMENTS_API_KEY = process.env.NOWPAYMENTS_API_KEY;
 const NOWPAYMENTS_IPN_SECRET = process.env.NOWPAYMENTS_IPN_SECRET;
 
