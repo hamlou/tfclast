@@ -18,11 +18,11 @@ jobs:
           node-version: '22'
           cache: 'npm'
 
-      - name: Setup Java (Ubuntu built-in)
+      - name: Setup Java 21
         run: |
           sudo apt-get update
-          sudo apt-get install -y openjdk-17-jdk
-          echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> $GITHUB_ENV
+          sudo apt-get install -y openjdk-21-jdk
+          echo "JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64" >> $GITHUB_ENV
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
