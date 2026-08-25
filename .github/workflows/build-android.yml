@@ -42,11 +42,12 @@ jobs:
         working-directory: android
         run: |
           chmod +x gradlew
-          ./gradlew assembleDebug
+          sed -i '/org.gradle.java.home/d' gradle.properties
+          ./gradlew assembleDebug -Dorg.gradle.java.home=$JAVA_HOME
 
       - name: Build AAB (release)
         working-directory: android
-        run: ./gradlew bundleRelease
+        run: ./gradlew bundleRelease -Dorg.gradle.java.home=$JAVA_HOME
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
