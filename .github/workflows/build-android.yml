@@ -4,10 +4,6 @@ on:
   workflow_dispatch:
   push:
     branches: [master]
-    paths:
-      - 'src/**'
-      - 'android/**'
-      - 'capacitor.config.*'
 
 jobs:
   build:
