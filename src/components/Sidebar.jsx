@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, History, List, CreditCard, Settings, LogOut, LayoutDashboard, LayoutGrid, Crown, Medal, FileText, Trash2 } from 'lucide-react';
+import { User, History, List, CreditCard, Settings, LogOut, LayoutDashboard, LayoutGrid, Crown, Medal, FileText, Trash2, Heart } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 import { motion } from 'framer-motion';
@@ -39,6 +39,7 @@ const Sidebar = () => {
     { icon: LayoutGrid, label: 'Browse', path: '/browse' },
     { icon: User, label: 'Profile', path: '/profile' },
     { icon: History, label: 'History', path: '/history' },
+    { icon: Heart, label: 'Sponsor', path: '/sponsor' },
     { icon: CreditCard, label: 'Subscription', path: '/subscription' },
     { icon: Medal, label: 'Champions', path: '/champions' },
     { icon: List, label: 'My List', path: '/mylist' },

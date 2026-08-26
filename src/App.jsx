@@ -20,6 +20,8 @@ import Champions from './pages/Champions';
 import Settings from './pages/Settings';
 import NotFound from './pages/NotFound';
 import PaymentSuccess from './pages/PaymentSuccess';
+import Sponsor from './pages/Sponsor';
+import SponsorSuccess from './pages/SponsorSuccess';
 
 import AdminLayout from './layouts/AdminLayout';
 
@@ -97,6 +99,8 @@ const AppRoutes = () => {
               <Route path="history" element={<History />} />
               <Route path="mylist" element={<MyList />} />
               <Route path="subscription" element={<Subscription />} />
+              <Route path="sponsor" element={<Sponsor />} />
+              <Route path="sponsor/success" element={<SponsorSuccess />} />
               <Route path="search" element={<Search />} />
               <Route path="champions" element={<Champions />} />
               <Route path="settings" element={<Settings />} />
