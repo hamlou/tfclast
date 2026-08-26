@@ -3,6 +3,7 @@ import { useUser } from '../context/UserContext';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import SEO from '../components/SEO';
 import { signIn, signUp, signInWithGoogle, checkGoogleRedirectResult, resendVerificationEmail } from '../firebase';
+import { Capacitor } from '@capacitor/core';
 import './Login.css';
 
 export default function Login() {
@@ -35,12 +36,13 @@ export default function Login() {
   const [unverifiedEmail, setUnverifiedEmail] = useState('');
   const [isResendingVerification, setIsResendingVerification] = useState(false);
 
-  const [showPreLoginSplash, setShowPreLoginSplash] = useState(true);
+  const [showPreLoginSplash, setShowPreLoginSplash] = useState(Capacitor.isNativePlatform());
 
   useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
     const timer = setTimeout(() => {
       setShowPreLoginSplash(false);
-    }, 3500);
+    }, 2500);
     return () => clearTimeout(timer);
   }, []);
 
