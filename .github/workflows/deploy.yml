@@ -1,0 +1,29 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 62.171.159.136
+          username: root
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /var/www/tfc
+            git fetch origin master
+            git reset --hard origin/master
+            npm install --legacy-peer-deps
+            npm run build
+            rsync -av --delete /var/www/tfc/dist/ /var/www/html/
+            cp /var/www/tfc/public/beforelogin.png /var/www/html/ 2>/dev/null || true
+            pm2 restart tfc-api || pm2 start server/server.js --name tfc-api
+            nginx -s reload
+            echo "Deployed successfully!"

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check Your Origin</title>
+    <style>
+        body {
+            background: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            padding: 40px;
+            text-align: center;
+        }
+        .info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            border-radius: 10px;
+            margin: 20px auto;
+            max-width: 600px;
+        }
+        h1 { font-size: 32px; margin-bottom: 20px; }
+        p { font-size: 18px; margin: 10px 0; }
+        .success { color: #55d080; font-weight: bold; }
+        .error { color: #e01818; font-weight: bold; }
+        .warning { color: #ffc107; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="info">
+        <h1>🔍 Checking Your Connection</h1>
+        <p id="origin">Checking...</p>
+        <p id="status"></p>
+        <p id="instruction"></p>
+    </div>
+
+    <script>
+        const origin = window.location.origin;
+        const originElement = document.getElementById('origin');
+        const statusElement = document.getElementById('status');
+        const instructionElement = document.getElementById('instruction');
+
+        originElement.textContent = `Current Origin: ${origin}`;
+
+        if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+            statusElement.textContent = '✅ CORRECT! You are on localhost';
+            statusElement.className = 'success';
+            instructionElement.textContent = 'Now try registering with a NEW email address. The verification link will work!';
+        } else if (origin.includes('netlify')) {
+            statusElement.textContent = '❌ WRONG! You are on Netlify!';
+            statusElement.className = 'error';
+            instructionElement.textContent = 'Go to http://localhost:5173 instead! Make sure your dev server is running.';
+        } else {
+            statusElement.textContent = '⚠️ Unknown domain';
+            statusElement.className = 'warning';
+            instructionElement.textContent = 'You should be on localhost for testing.';
+        }
+
+        // Auto-redirect to localhost after 3 seconds if on Netlify
+        if (origin.includes('netlify')) {
+            setTimeout(() => {
+                console.log('Redirecting to localhost...');
+                // window.location.href = 'http://localhost:5173';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

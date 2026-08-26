@@ -61,9 +61,9 @@ const AppRoutes = () => {
       if (Capacitor.isNativePlatform()) {
         const timer = setTimeout(() => {
           import('@capacitor/splash-screen').then(({ SplashScreen }) => {
-            SplashScreen.hide({ fadeOutDuration: 300 });
+            SplashScreen.hide({ fadeOutDuration: 500 });
           });
-        }, 2000);
+        }, 2500);
         return () => clearTimeout(timer);
       }
     }, []);
