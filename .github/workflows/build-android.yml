@@ -33,6 +33,15 @@ jobs:
           npm install @react-three/fiber @react-three/drei three --legacy-peer-deps
 
       - name: Build web assets
+        env:
+          VITE_FIREBASE_API_KEY: AIzaSyDyptN2m-wIxze1jRJya1hGzqueKe510r4
+          VITE_FIREBASE_AUTH_DOMAIN: tfcq-32a8b.firebaseapp.com
+          VITE_FIREBASE_PROJECT_ID: tfcq-32a8b
+          VITE_FIREBASE_STORAGE_BUCKET: tfcq-32a8b.firebasestorage.app
+          VITE_FIREBASE_MESSAGING_SENDER_ID: 1027395831145
+          VITE_FIREBASE_APP_ID: 1:1027395831145:web:969f6de4cf9517755e29f8
+          VITE_FIREBASE_MEASUREMENT_ID: G-1DWPEPHZDG
+          VITE_BACKEND_URL: https://tfc.events
         run: npm run build
 
       - name: Sync Capacitor
