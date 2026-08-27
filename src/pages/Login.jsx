@@ -36,15 +36,7 @@ export default function Login() {
   const [unverifiedEmail, setUnverifiedEmail] = useState('');
   const [isResendingVerification, setIsResendingVerification] = useState(false);
 
-  const [showPreLoginSplash, setShowPreLoginSplash] = useState(Capacitor.isNativePlatform());
-
-  useEffect(() => {
-    if (!Capacitor.isNativePlatform()) return;
-    const timer = setTimeout(() => {
-      setShowPreLoginSplash(false);
-    }, 2500);
-    return () => clearTimeout(timer);
-  }, []);
+  const [showPreLoginSplash, setShowPreLoginSplash] = useState(false);
 
   /* ── Check for verification success from email verification page ── */
   useEffect(() => {
