@@ -192,7 +192,7 @@ const Home = () => {
 
       {/* Fixed TFC logo top-right */}
       <div className="fixed top-3 right-3 sm:top-5 sm:right-7 md:top-5 md:right-8 z-[1000] opacity-90">
-        <img src="/logo tfc in homejsx.png" alt="TFC Logo" className="w-16 sm:w-20 md:w-28 lg:w-32 h-auto drop-shadow-lg" />
+        <img src="/logo tfc in homejsx.png" alt="TFC Logo" className="w-16 sm:w-20 md:w-28 lg:w-32 h-auto" />
       </div>
 
       {/* ── HERO ── */}

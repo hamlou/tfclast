@@ -54,23 +54,54 @@ const Navbar = () => {
     const menuItems = ['Home', 'Events', 'About', 'Contact'];
 
     return (
-        <nav className={`navbar ${isScrolled ? 'scrolled' : ''}`}>
-            <div className="navbar-container">
-                {/* MOBILE BRAND */}
-                <div className="mobile-brand">
-                    <img src="/tfc-above-sidebar.png" alt="TFC Logo" className="mobile-logo-img" />
+        <>
+            {/* HAMBURGER BUTTON - Mobile Only (TOP LEFT) - Outside navbar */}
+            <button
+                className="hamburger-btn"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                aria-label="Toggle menu"
+            >
+                <div className={`hamburger-icon ${mobileMenuOpen ? 'open' : ''}`}>
+                    <span></span>
+                    <span></span>
+                    <span></span>
                 </div>
+            </button>
 
-                {/* DESKTOP MENU */}
-                <div className="nav-menu desktop">
-                    {menuItems.map((item) => (
-                        <NavItem key={item} label={item} />
-                    ))}
-                </div>
-
-
+            {/* MOBILE MENU OVERLAY */}
+            <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
+                {menuItems.map((item) => (
+                    <a
+                        key={item}
+                        href={`#${item.toLowerCase()}`}
+                        className="mobile-menu-item"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            setMobileMenuOpen(false);
+                            if (item === 'Home') {
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                            } else {
+                                const element = document.getElementById(item.toLowerCase());
+                                if (element) element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            }
+                        }}
+                    >
+                        {item}
+                    </a>
+                ))}
             </div>
-        </nav>
+
+            {/* DESKTOP NAVBAR */}
+            <nav className={`navbar ${isScrolled ? 'scrolled' : ''}`}>
+                <div className="navbar-container">
+                    <div className="nav-menu desktop">
+                        {menuItems.map((item) => (
+                            <NavItem key={item} label={item} />
+                        ))}
+                    </div>
+                </div>
+            </nav>
+        </>
     );
 };
 
