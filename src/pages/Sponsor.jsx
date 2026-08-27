@@ -66,6 +66,9 @@ const Sponsor = () => {
 
       if (Capacitor.isNativePlatform()) {
         const { Browser } = await import('@capacitor/browser');
+        Browser.addListener('browserFinished', () => {
+          window.location.reload();
+        });
         await Browser.open({ url: data.url });
         setLoading(false);
       } else {

@@ -95,6 +95,9 @@ const Subscription = () => {
       // Open payment URL: native browser on app, redirect on web
       if (Capacitor.isNativePlatform()) {
         const { Browser } = await import('@capacitor/browser');
+        Browser.addListener('browserFinished', () => {
+          window.location.reload();
+        });
         await Browser.open({ url: data.payment_url });
         setCryptoLoading(null);
       } else {

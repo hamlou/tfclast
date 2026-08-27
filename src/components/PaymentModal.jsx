@@ -59,6 +59,9 @@ const PaymentModal = ({ isOpen, onClose, plan }) => {
       // Open payment URL: native browser on app, redirect on web
       if (Capacitor.isNativePlatform()) {
         const { Browser } = await import('@capacitor/browser');
+        Browser.addListener('browserFinished', () => {
+          window.location.reload();
+        });
         await Browser.open({ url: data.url });
         setLoading(false);
         onClose();
