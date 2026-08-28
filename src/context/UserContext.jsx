@@ -1,7 +1,7 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { auth, db } from '../firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { doc, onSnapshot } from 'firebase/firestore';
+import { doc, onSnapshot, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { isAdminEmail } from '../config/admin';
 
 
@@ -24,10 +24,8 @@ export const UserProvider = ({ children }) => {
 
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
-  const [watchHistory, setWatchHistory] = useState(() => {
-    const saved = localStorage.getItem('tfc_history');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [watchHistory, setWatchHistory] = useState([]);
+  const historyLoadedRef = useRef(false);
 
   const [myList, setMyList] = useState(() => {
     const saved = localStorage.getItem('tfc_list');
@@ -74,6 +72,12 @@ export const UserProvider = ({ children }) => {
 
             const subscriptionActive = isActive && notExpired;
 
+            // Load watch history from Firestore
+            if (!historyLoadedRef.current && firestoreData.watchHistory) {
+              setWatchHistory(firestoreData.watchHistory);
+              historyLoadedRef.current = true;
+            }
+
             setUser(prev => {
               if (!prev) return prev;
               const updated = {
@@ -111,18 +115,13 @@ export const UserProvider = ({ children }) => {
     else localStorage.removeItem('tfc_user');
   }, [user]);
 
-  useEffect(() => {
-    localStorage.setItem('tfc_history', JSON.stringify(watchHistory));
-  }, [watchHistory]);
 
   useEffect(() => {
     localStorage.setItem('tfc_list', JSON.stringify(myList));
   }, [myList]);
 
   const login = (email, password, username, rememberMe = false) => {
-    const sessionDuration = rememberMe
-      ? 30 * 24 * 60 * 60 * 1000   // 30 days if "Remember me"
-      : 24 * 60 * 60 * 1000;        // 24 hours default
+    const sessionDuration = 8 * 60 * 60 * 1000; // 8 hours for all sessions
     const uid = auth.currentUser?.uid || email; // use real Firebase UID
     const userData = {
       id: uid,
@@ -144,10 +143,10 @@ export const UserProvider = ({ children }) => {
     setUser(null);
     setWatchHistory([]);
     setMyList([]);
+    historyLoadedRef.current = false;
     localStorage.removeItem('tfc_user');
-    localStorage.removeItem('tfc_history');
     localStorage.removeItem('tfc_list');
-    
+
     // Attempt to sign out of Firebase (ignore errors if not logged in)
     try {
       signOut(auth);
@@ -168,11 +167,20 @@ export const UserProvider = ({ children }) => {
 
 
 
-  const addToHistory = (item) => {
-    setWatchHistory(prev => [
-      { ...item, watchedAt: new Date().toISOString(), id: item.id || Math.random().toString() },
-      ...prev.filter(i => i.id !== item.id)
-    ].slice(0, 50));
+  const addToHistory = async (item) => {
+    const newItem = { ...item, watchedAt: new Date().toISOString(), id: item.id || Math.random().toString() };
+    const newHistory = [newItem, ...watchHistory.filter(i => i.id !== item.id)].slice(0, 100);
+    setWatchHistory(newHistory);
+
+    // Save to Firestore if user is logged in
+    if (auth.currentUser) {
+      try {
+        const userDocRef = doc(db, 'users', auth.currentUser.uid);
+        await updateDoc(userDocRef, { watchHistory: newHistory });
+      } catch (err) {
+        console.error('Failed to save watch history:', err);
+      }
+    }
   };
 
   const toggleMyList = (item) => {
