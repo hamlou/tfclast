@@ -6,6 +6,7 @@ import { auth } from '../firebase';
 import { useNavigate } from 'react-router-dom';
 import SEO from '../components/SEO';
 
+import { BACKEND_URL as BACKEND } from '../config/api';
 // Default MMA-themed avatar (silhouette fighter)
 const DEFAULT_AVATAR = 'https://images.unsplash.com/photo-1599058917212-d750089bc07e?w=400&h=400&fit=crop&crop=face';
 
@@ -37,7 +38,7 @@ const Profile = () => {
     setPortalLoading(true);
     try {
       const token = await auth.currentUser.getIdToken();
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001'}/api/payments/portal`, {
+      const response = await fetch(`${BACKEND}/api/payments/portal`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
       });
@@ -223,6 +224,7 @@ const Profile = () => {
             <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-4">Quick Access</h4>
             <div className="space-y-2">
               {[
+                ...(user.role === 'admin' ? [{ label: 'TFC Console', path: '/admin' }] : []),
                 { label: 'My Watch History', path: '/history' },
                 { label: 'My Saved List', path: '/mylist' },
                 { label: 'Champions', path: '/champions' },
