@@ -52,6 +52,19 @@ import PrivacyPolicy from './pages/PrivacyPolicy';
 import Terms from './pages/Terms';
 import DeleteAccount from './pages/DeleteAccount';
 
+// ── Firebase email action links (verify / reset) ─────────────────────────────
+// These arrive from an email and must render regardless of whether some other
+// account is already signed in on this browser. Checked before any auth
+// branching so a stale session can never swallow the link.
+const getEmailActionMode = () => {
+  const params = new URLSearchParams(window.location.search);
+  const mode = params.get('mode');
+  const oobCode = params.get('oobCode');
+  if (!oobCode) return null;
+  if (mode === 'verifyEmail' || mode === 'resetPassword') return mode;
+  return null;
+};
+
 const AppRoutes = () => {
   try {
     const { user, isLogoutModalOpen, setIsLogoutModalOpen, logout, login } = useUser();
@@ -86,6 +99,13 @@ const AppRoutes = () => {
         navigate('/login');
       }, 100);
     };
+
+    // An email action link outranks the signed-in app. Without this, a stale
+    // session in this browser redirects /verify-email straight to Home and the
+    // oobCode is never applied.
+    const emailActionMode = getEmailActionMode();
+    if (emailActionMode === 'verifyEmail') return <VerifyEmail />;
+    if (emailActionMode === 'resetPassword') return <ResetPassword />;
 
     return (
       <>
