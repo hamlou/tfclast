@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Heart, Shield, Loader2 } from 'lucide-react';
+import { Shield, Loader2 } from 'lucide-react';
 import { auth } from '../firebase';
 import { Capacitor } from '@capacitor/core';
 import SEO from '../components/SEO';
@@ -92,11 +92,11 @@ const Sponsor = () => {
         >
           <div className="text-center mb-8">
             <h1 className="text-4xl md:text-5xl font-black uppercase tracking-tighter mb-4">
-              Support the <span className="text-primary">Action</span>
+              Become a <span className="text-primary">Sponsor</span>
             </h1>
             <p className="text-gray-400 leading-relaxed">
-              Your support helps us grow the Total Full Contact Championship,
-              bring better fights, and improve the platform. Every contribution counts!
+              Sponsor the Total Full Contact Championship and get your brand
+              in front of thousands of MMA fans. Choose a sponsorship amount below.
             </p>
           </div>
 
@@ -145,11 +145,7 @@ const Sponsor = () => {
               disabled={loading}
               className="w-full bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-2"
             >
-              {loading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <Heart className="w-5 h-5" />
-              )}
+              {loading && <Loader2 className="w-5 h-5 animate-spin" />}
               {loading ? 'Processing...' : 'Pay Now'}
             </button>
 
