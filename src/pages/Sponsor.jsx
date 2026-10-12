@@ -4,6 +4,7 @@ import { Heart, Shield, Loader2 } from 'lucide-react';
 import { auth } from '../firebase';
 import { Capacitor } from '@capacitor/core';
 import SEO from '../components/SEO';
+import { BACKEND_URL as BACKEND } from '../config/api';
 
 const Sponsor = () => {
   const [amount, setAmount] = useState(10);
@@ -28,7 +29,7 @@ const Sponsor = () => {
     setError('');
   };
 
-  const handleDonate = async () => {
+  const handleSponsor = async () => {
     const currentUser = auth.currentUser;
     if (!currentUser) {
       setError('Please log in to sponsor TFC.');
@@ -36,7 +37,7 @@ const Sponsor = () => {
     }
 
     if (!amount || amount < 0.5) {
-      setError('Minimum donation is $0.50');
+      setError('Minimum sponsorship is $0.50');
       return;
     }
 
@@ -44,7 +45,6 @@ const Sponsor = () => {
     setError('');
 
     try {
-      const BACKEND = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
       const token = await currentUser.getIdToken();
 
       const response = await fetch(`${BACKEND}/api/payments/create-donation-session`, {
@@ -75,7 +75,7 @@ const Sponsor = () => {
         window.location.href = data.url;
       }
     } catch (err) {
-      console.error('Donation error:', err);
+      console.error('Sponsorship error:', err);
       setError('Something went wrong. Please try again.');
       setLoading(false);
     }
@@ -141,7 +141,7 @@ const Sponsor = () => {
             )}
 
             <button
-              onClick={handleDonate}
+              onClick={handleSponsor}
               disabled={loading}
               className="w-full bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-2"
             >
@@ -150,7 +150,7 @@ const Sponsor = () => {
               ) : (
                 <Heart className="w-5 h-5" />
               )}
-              {loading ? 'Processing...' : 'Donate Now'}
+              {loading ? 'Processing...' : 'Pay Now'}
             </button>
 
             <div className="flex items-center justify-center space-x-2 text-gray-500 text-xs uppercase tracking-widest mt-6">

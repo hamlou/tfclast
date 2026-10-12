@@ -35,7 +35,7 @@ const SponsorSuccess = () => {
 
   return (
     <>
-      <SEO title="Thank You" description="Thank you for your donation" />
+      <SEO title="Thank You" description="Thank you for your sponsorship" />
       <div className="min-h-screen bg-black flex items-center justify-center p-6">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
@@ -57,7 +57,7 @@ const SponsorSuccess = () => {
                 Thank You!
               </h1>
               <p className="text-gray-400 mb-8 leading-relaxed">
-                Your generous donation has been successfully processed. We deeply appreciate
+                Your generous sponsorship has been successfully processed. We deeply appreciate
                 your support for the Total Full Contact Championship!
               </p>
               <p className="text-gray-500 text-sm">
@@ -85,7 +85,7 @@ const SponsorSuccess = () => {
                 Oops!
               </h1>
               <p className="text-gray-400 mb-8 leading-relaxed">
-                Something went wrong with your donation. Please try again.
+                Something went wrong with your sponsorship. Please try again.
               </p>
               <button
                 onClick={() => navigate('/sponsor')}
